@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>New Athlete</title>
+</head>
+<body>
+    <h1>New Athlete</h1>
+    <form action="#" th:action="@{/athletes}" method="post">
+        <label>Name: <input type="text" name="name" /></label><br/>
+        <!-- Simplified form, add more fields as needed -->
+        <button type="submit">Create</button>
+    </form>
+    <a href="/athletes">Back</a>
+</body>
+</html>

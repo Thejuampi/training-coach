@@ -1,0 +1,7 @@
+<FindBugsFilter>
+    <!-- Suppress dead local store warnings in test code (common false positives) -->
+    <Match>
+        <Bug pattern="DLS_DEAD_LOCAL_STORE"/>
+        <Class name="~.*Test.*"/>
+    </Match>
+</FindBugsFilter>

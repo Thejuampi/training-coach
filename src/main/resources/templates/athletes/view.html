@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Athlete Details</title>
+</head>
+<body>
+    <h1 th:text="${athlete.name()}">Athlete</h1>
+    <p>ID: <span th:text="${athlete.id()}"></span></p>
+    <p>Profile: <span th:text="${athlete.profile()}"></span></p>
+    <a href="/athletes">Back</a>
+</body>
+</html>

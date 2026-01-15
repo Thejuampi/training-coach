@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Athletes</title>
+</head>
+<body>
+    <h1>Athletes</h1>
+    <a href="/athletes/new">Add New Athlete</a>
+    <ul>
+        <li th:each="athlete : ${athletes}">
+            <a th:href="@{/athletes/{id}(id=${athlete.id()})}" th:text="${athlete.name()}">Name</a>
+        </li>
+    </ul>
+</body>
+</html>
