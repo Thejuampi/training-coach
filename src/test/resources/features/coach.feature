@@ -1,8 +1,10 @@
+@smoke
 Feature: Coach workflows
 
   Background:
     Given a coach user exists
 
+  @smoke
   Scenario: UC1 Manage Athlete
     Given a coach creates an athlete profile with age 30 and level intermediate
     And metrics ftp 250.0 fthr 180.0 vo2 45.0
@@ -42,6 +44,7 @@ Feature: Coach workflows
     Then a new plan version is created
     And the previous plan version remains viewable
 
+  @smoke
   Scenario: UC6 Adjust Plan
     Given readiness score 3.0 and compliance 90.0
     When the coach asks for an adjustment
@@ -62,6 +65,7 @@ Feature: Coach workflows
     And the coach sees intensity distribution versus target 80/20
     And the coach sees flags for missed key sessions
 
+  @smoke
   Scenario: UC7 Coach Communication
     Given a saved athlete
     When the coach posts a note "Focus on recovery this week"

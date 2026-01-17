@@ -1,5 +1,7 @@
 package com.training.coach.shared.config;
 
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.proc.SecurityContext;
 import com.training.coach.security.JwtKeyProvider;
 import com.training.coach.security.JwtProperties;
 import com.training.coach.user.infrastructure.persistence.SystemUserJpaRepository;
@@ -125,10 +127,6 @@ public class SecurityConfig {
     @Bean
     public ReactiveJwtDecoder reactiveJwtDecoder(JwtKeyProvider provider) {
         return NimbusReactiveJwtDecoder.withPublicKey(provider.publicKey()).build();
-    }
-
-    private ReactiveJwtDecoder providerReactiveJwtDecoder() {
-        return NimbusReactiveJwtDecoder.withPublicKey(jwtKeyProvider().publicKey()).build();
     }
 
     private ReactiveJwtAuthenticationConverterAdapter jwtAuthenticationConverter() {

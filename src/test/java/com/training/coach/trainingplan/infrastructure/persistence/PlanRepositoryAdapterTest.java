@@ -31,8 +31,7 @@ class PlanRepositoryAdapterTest {
         PlanRepositoryAdapter adapter = new PlanRepositoryAdapter(trainingPlanRepo, planVersionRepo, planWorkoutRepo);
 
         Instant createdAt = Instant.parse("2024-01-01T00:00:00Z");
-        PlanSummary planSummary =
-                new PlanSummary("plan-1", "athlete-1", 1, PlanVersionStatus.DRAFT, createdAt);
+        PlanSummary planSummary = new PlanSummary("plan-1", "athlete-1", 1, PlanVersionStatus.DRAFT, createdAt);
 
         adapter.save(planSummary);
 

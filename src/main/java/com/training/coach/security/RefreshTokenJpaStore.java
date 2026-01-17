@@ -16,14 +16,14 @@ public class RefreshTokenJpaStore implements RefreshTokenStore {
 
     @Override
     public RefreshTokenRecord save(RefreshTokenRecord record) {
-        RefreshTokenEntity entity = repository.findById(record.getId()).orElseGet(RefreshTokenEntity::new);
-        entity.setId(record.getId());
-        entity.setUserId(record.getUserId());
-        entity.setTokenHash(record.getTokenHash());
-        entity.setFamilyId(record.getFamilyId());
-        entity.setExpiresAt(record.getExpiresAt());
-        entity.setRevokedAt(record.getRevokedAt());
-        entity.setReplacedBy(record.getReplacedBy());
+        RefreshTokenEntity entity = repository.findById(record.id()).orElseGet(RefreshTokenEntity::new);
+        entity.setId(record.id());
+        entity.setUserId(record.userId());
+        entity.setTokenHash(record.tokenHash());
+        entity.setFamilyId(record.familyId());
+        entity.setExpiresAt(record.expiresAt());
+        entity.setRevokedAt(record.revokedAt());
+        entity.setReplacedBy(record.replacedBy());
         return toRecord(repository.save(entity));
     }
 

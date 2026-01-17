@@ -56,7 +56,8 @@ public class PlanRepositoryAdapter implements PlanRepository {
             Optional<PlanVersionEntity> latestVersion = planVersionRepo.findFirstByPlanIdOrderByVersionDesc(id);
             PlanVersionStatus status =
                     latestVersion.map(PlanVersionEntity::getStatus).orElse(PlanVersionStatus.DRAFT);
-            int currentVersion = latestVersion.map(PlanVersionEntity::getVersion).orElse(1);
+            int currentVersion =
+                    latestVersion.map(PlanVersionEntity::getVersion).orElse(1);
             return new PlanSummary(
                     entity.getId(), entity.getAthleteId(), currentVersion, status, entity.getCreatedAt());
         });
@@ -70,7 +71,8 @@ public class PlanRepositoryAdapter implements PlanRepository {
                             planVersionRepo.findFirstByPlanIdOrderByVersionDesc(entity.getId());
                     PlanVersionStatus status =
                             latestVersion.map(PlanVersionEntity::getStatus).orElse(PlanVersionStatus.DRAFT);
-                    int currentVersion = latestVersion.map(PlanVersionEntity::getVersion).orElse(1);
+                    int currentVersion =
+                            latestVersion.map(PlanVersionEntity::getVersion).orElse(1);
                     return new PlanSummary(
                             entity.getId(), entity.getAthleteId(), currentVersion, status, entity.getCreatedAt());
                 })
@@ -80,18 +82,17 @@ public class PlanRepositoryAdapter implements PlanRepository {
     @Override
     public PlanVersion saveVersion(PlanVersion version) {
         PlanVersionEntity entity = new PlanVersionEntity();
-        entity.setId(version.planId() + "-" + version.versionNumber());
         entity.setPlanId(version.planId());
         entity.setVersion(version.versionNumber());
         entity.setStatus(version.status());
         entity.setCreatedAt(version.createdAt());
-        planVersionRepo.save(entity);
+        PlanVersionEntity savedVersion = planVersionRepo.save(entity);
 
         // Save workouts
         for (Workout workout : version.workouts()) {
             PlanWorkoutEntity workoutEntity = new PlanWorkoutEntity();
             workoutEntity.setId(workout.id());
-            workoutEntity.setPlanVersionId(entity.getId());
+            workoutEntity.setPlanVersionId(savedVersion.getId());
             workoutEntity.setDate(workout.date());
             workoutEntity.setType(workout.type().name());
             workoutEntity.setDurationMinutes(workout.durationMinutes());
@@ -185,7 +186,10 @@ public class PlanRepositoryAdapter implements PlanRepository {
     }
 
     private Workout.IntensityProfile defaultIntensityProfile() {
-        return new Workout.IntensityProfile(
-                Percent.of(0), Percent.of(0), Percent.of(0), Percent.of(0), Percent.of(0));
+        return new Workout.IntensityProfile(Percent.of(0), Percent.of(0), Percent.of(0), Percent.of(0), Percent.of(0));
+    }
+
+    private String defaultTitle(PlanSummary plan) {
+        return "Plan " + plan.id();
     }
 }

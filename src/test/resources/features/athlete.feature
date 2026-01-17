@@ -1,8 +1,10 @@
+@smoke
 Feature: Athlete workflows
 
   Background:
     Given an athlete user exists
 
+  @smoke
   Scenario: UC4 Review Readiness & Wellness
     Given readiness signals hrv 60.0 rhr 50.0 sleep 7.0 fatigue 3 subjective 6
     When readiness is calculated
@@ -24,6 +26,7 @@ Feature: Athlete workflows
     Then the wellness snapshot for date "2026-01-02" reflects fatigue score 6
     And readiness is recomputed
 
+  @smoke
   Scenario: UC5 Track Compliance/Progress
     Given a plan with 3 workouts planned
     And actual workouts completed 2
@@ -50,6 +53,7 @@ Feature: Athlete workflows
     When the athlete logs RPE 7 and notes "Hard headwind"
     Then the feedback is stored and visible to the coach
 
+  @smoke
   Scenario: UC9 Review Activity History
     Given a saved athlete with linked Intervals.icu
     When activities are ingested from "2026-01-01" to "2026-01-03"

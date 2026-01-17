@@ -1,8 +1,10 @@
+@smoke
 Feature: Admin workflows
 
   Background:
     Given an admin user exists
 
+  @smoke
   Scenario: UC8 Configure Integrations
     Given an admin enters API key "test-key"
     When the integration is validated

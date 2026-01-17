@@ -1,8 +1,10 @@
+@smoke
 Feature: System workflows
 
   Background:
     Given the system is running
 
+  @smoke
   Scenario: UC2 Sync Athlete Data
     Given a saved athlete with linked Intervals.icu
     When a sync is triggered
