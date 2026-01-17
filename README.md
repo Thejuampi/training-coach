@@ -97,7 +97,7 @@ mvn test jacoco:report
 ### Lessons Learned
 
 - Prefer the Maven wrapper for consistent builds: `./mvnw verify` or `mvnw.cmd verify` on Windows.
-- When passing system properties in PowerShell, quote them (e.g., `mvnw.cmd verify "-Dlogging.level.root=OFF"`).
+- When passing system properties in PowerShell, quote them (e.g., `mvnw.cmd verify`).
 - Code style is enforced by Spotless; if the build fails on formatting, run `mvn spotless:apply` and re-run the build.
 
 ## Testing
@@ -149,6 +149,23 @@ Once the application is running, access API documentation at:
 ```
 http://localhost:8080/swagger-ui.html
 ```
+
+## Security (Dev Defaults)
+
+Spring Security basic auth is enabled with database-backed users.
+
+On first run, a bootstrap admin is created if missing:
+
+- Username: `admin` (or `SECURITY_BOOTSTRAP_ADMIN_USERNAME`)
+- Password: `adminpass` (or `SECURITY_BOOTSTRAP_ADMIN_PASSWORD`)
+
+## Feature Documentation
+
+- `docs/FEATURES.md`
+- `docs/USE_CASES.md`
+- `docs/UI_VIEWS.md`
+- `docs/SEILER_INTENSITY_MODEL.md`
+- `docs/GLOSSARY.md`
 
 ## Contributing
 

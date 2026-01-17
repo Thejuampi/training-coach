@@ -20,10 +20,10 @@ spring:
 
 logging:
   level:
-    root: INFO
-    com.training.coach: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    root: OFF
+    com.training.coach: OFF
+    org.hibernate.SQL: OFF
+    org.hibernate.type.descriptor.sql.BasicBinder: OFF
 
 intervals:
   icu:

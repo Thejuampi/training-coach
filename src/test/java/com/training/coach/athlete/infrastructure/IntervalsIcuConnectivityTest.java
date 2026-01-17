@@ -14,7 +14,9 @@ import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, properties = "spring.profiles.active=test")
+@SpringBootTest(
+        webEnvironment = SpringBootTest.WebEnvironment.NONE,
+        properties = {"spring.profiles.active=test", "intervals.icu.api-key=${INTERVALS_ICU_API_KEY}"})
 @EnabledIfEnvironmentVariable(named = "INTERVALS_ICU_API_KEY", matches = ".+")
 @DisplayName("Intervals.icu connectivity")
 class IntervalsIcuConnectivityTest {

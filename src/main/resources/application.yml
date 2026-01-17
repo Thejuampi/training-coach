@@ -3,6 +3,10 @@ spring:
     name: training-coach
   profiles:
     active: dev
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=10m
 
 server:
   port: 8080
@@ -13,6 +17,14 @@ logging:
     com.training.coach: DEBUG
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+training:
+  security:
+    jwt:
+      issuer: training-coach
+      audience: training-coach-api
+      access-token-ttl-seconds: 600
+      refresh-token-ttl-days: 14
 
 intervals:
   icu:

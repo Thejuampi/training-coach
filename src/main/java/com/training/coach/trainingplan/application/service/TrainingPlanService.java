@@ -63,7 +63,7 @@ public class TrainingPlanService {
                     List.of(new Workout.Interval(
                             Workout.Interval.IntervalType.VO2_MAX,
                             Minutes.of(5),
-                            Watts.of(300),
+                            Watts.of(athlete.currentMetrics().ftp().value() * 1.10),
                             BeatsPerMinute.of(170)))));
             LocalDate date2 = weekStart.with(availableDays.get(1));
             workouts.add(new Workout(

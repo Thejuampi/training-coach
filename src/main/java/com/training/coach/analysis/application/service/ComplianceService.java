@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 public class ComplianceService {
 
     public double calculateCompliance(int plannedWorkouts, int completedWorkouts) {
-        if (plannedWorkouts == 0) return 100.0;
+        if (plannedWorkouts == 0) {
+            return 100.0;
+        }
         return (double) completedWorkouts / plannedWorkouts * 100.0;
     }
 }
