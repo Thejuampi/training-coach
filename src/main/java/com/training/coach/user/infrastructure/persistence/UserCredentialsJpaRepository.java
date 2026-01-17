@@ -9,4 +9,3 @@ public interface UserCredentialsJpaRepository extends JpaRepository<UserCredenti
 
     Optional<UserCredentialsEntity> findByUserId(String userId);
 }
-

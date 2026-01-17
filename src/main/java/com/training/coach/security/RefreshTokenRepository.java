@@ -9,4 +9,3 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshTokenEntity
 
     List<RefreshTokenEntity> findByFamilyId(String familyId);
 }
-

@@ -4,11 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
+import com.training.coach.user.application.port.out.SystemUserRepository;
+import com.training.coach.user.domain.model.SystemUser;
 import com.training.coach.user.domain.model.UserPreferences;
 import com.training.coach.user.domain.model.UserRole;
-import com.training.coach.user.infrastructure.persistence.SystemUserJpaRepository;
 import com.training.coach.user.infrastructure.persistence.UserCredentialsJpaRepository;
-import com.training.coach.user.infrastructure.persistence.entity.SystemUserEntity;
 import com.training.coach.user.infrastructure.persistence.entity.UserCredentialsEntity;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -26,7 +26,7 @@ class AuthServiceTest {
         var keyProvider = JwtKeyProvider.forTests();
 
         var credentialsRepo = org.mockito.Mockito.mock(UserCredentialsJpaRepository.class);
-        var userRepo = org.mockito.Mockito.mock(SystemUserJpaRepository.class);
+        var userRepo = org.mockito.Mockito.mock(SystemUserRepository.class);
         var refreshRepo = new InMemoryRefreshTokenStore();
 
         UserCredentialsEntity cred = new UserCredentialsEntity();
@@ -36,17 +36,11 @@ class AuthServiceTest {
         cred.setEnabled(true);
         when(credentialsRepo.findByUsername("coach_a")).thenReturn(Optional.of(cred));
 
-        SystemUserEntity userEntity = new SystemUserEntity();
-        userEntity.setId("u-1");
-        userEntity.setName("Coach A");
-        userEntity.setRole(UserRole.COACH);
-        userEntity.setMeasurementSystem(UserPreferences.metricDefaults().measurementSystem());
-        userEntity.setWeightUnit(UserPreferences.metricDefaults().weightUnit());
-        userEntity.setDistanceUnit(UserPreferences.metricDefaults().distanceUnit());
-        userEntity.setHeightUnit(UserPreferences.metricDefaults().heightUnit());
-        when(userRepo.findById("u-1")).thenReturn(Optional.of(userEntity));
+        SystemUser user = new SystemUser("u-1", "Coach A", UserRole.COACH, UserPreferences.metricDefaults());
+        when(userRepo.findById("u-1")).thenReturn(Optional.of(user));
 
-        AuthService service = new AuthService(passwordEncoder, jwtProps, keyProvider.encoder(), refreshRepo, credentialsRepo, userRepo);
+        AuthService service = new AuthService(
+                passwordEncoder, jwtProps, keyProvider.encoder(), refreshRepo, credentialsRepo, userRepo);
 
         AuthService.AuthTokens tokens = service.authenticate("coach_a", "secret");
         assertThat(tokens.accessToken()).isNotBlank();
@@ -61,7 +55,7 @@ class AuthServiceTest {
         var keyProvider = JwtKeyProvider.forTests();
 
         var credentialsRepo = org.mockito.Mockito.mock(UserCredentialsJpaRepository.class);
-        var userRepo = org.mockito.Mockito.mock(SystemUserJpaRepository.class);
+        var userRepo = org.mockito.Mockito.mock(SystemUserRepository.class);
         var refreshRepo = new InMemoryRefreshTokenStore();
 
         UserCredentialsEntity cred = new UserCredentialsEntity();
@@ -71,10 +65,10 @@ class AuthServiceTest {
         cred.setEnabled(true);
         when(credentialsRepo.findByUsername("coach_a")).thenReturn(Optional.of(cred));
 
-        AuthService service = new AuthService(passwordEncoder, jwtProps, keyProvider.encoder(), refreshRepo, credentialsRepo, userRepo);
+        AuthService service = new AuthService(
+                passwordEncoder, jwtProps, keyProvider.encoder(), refreshRepo, credentialsRepo, userRepo);
 
-        assertThatThrownBy(() -> service.authenticate("coach_a", "wrong"))
-                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> service.authenticate("coach_a", "wrong")).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -83,7 +77,7 @@ class AuthServiceTest {
         var jwtProps = JwtProperties.defaults();
         var keyProvider = JwtKeyProvider.forTests();
         var credentialsRepo = org.mockito.Mockito.mock(UserCredentialsJpaRepository.class);
-        var userRepo = org.mockito.Mockito.mock(SystemUserJpaRepository.class);
+        var userRepo = org.mockito.Mockito.mock(SystemUserRepository.class);
         var refreshRepo = new InMemoryRefreshTokenStore();
 
         UserCredentialsEntity cred = new UserCredentialsEntity();
@@ -93,26 +87,19 @@ class AuthServiceTest {
         cred.setEnabled(true);
         when(credentialsRepo.findByUsername("coach_a")).thenReturn(Optional.of(cred));
 
-        SystemUserEntity userEntity = new SystemUserEntity();
-        userEntity.setId("u-1");
-        userEntity.setName("Coach A");
-        userEntity.setRole(UserRole.COACH);
-        userEntity.setMeasurementSystem(UserPreferences.metricDefaults().measurementSystem());
-        userEntity.setWeightUnit(UserPreferences.metricDefaults().weightUnit());
-        userEntity.setDistanceUnit(UserPreferences.metricDefaults().distanceUnit());
-        userEntity.setHeightUnit(UserPreferences.metricDefaults().heightUnit());
-        when(userRepo.findById("u-1")).thenReturn(Optional.of(userEntity));
+        SystemUser user = new SystemUser("u-1", "Coach A", UserRole.COACH, UserPreferences.metricDefaults());
+        when(userRepo.findById("u-1")).thenReturn(Optional.of(user));
 
-        AuthService service = new AuthService(passwordEncoder, jwtProps, keyProvider.encoder(), refreshRepo, credentialsRepo, userRepo);
+        AuthService service = new AuthService(
+                passwordEncoder, jwtProps, keyProvider.encoder(), refreshRepo, credentialsRepo, userRepo);
 
         AuthService.AuthTokens issued = service.authenticate("coach_a", "secret");
         AuthService.AuthTokens tokens = service.refresh(issued.refreshToken());
 
         assertThat(tokens.refreshToken()).isNotEqualTo(issued.refreshToken());
-        RefreshTokenStore.RefreshTokenRecord revoked = refreshRepo
-                .findByTokenHash(hash(issued.refreshToken()))
-                .orElseThrow();
-        assertThat(revoked.getRevokedAt()).isNotNull();
+        RefreshTokenStore.RefreshTokenRecord revoked =
+                refreshRepo.findByTokenHash(hash(issued.refreshToken())).orElseThrow();
+        assertThat(revoked.revokedAt()).isNotNull();
     }
 
     private String hash(String value) {

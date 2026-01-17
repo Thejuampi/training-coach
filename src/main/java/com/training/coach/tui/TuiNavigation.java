@@ -6,4 +6,3 @@ public enum TuiNavigation {
     MAIN_MENU,
     FEATURE_PLACEHOLDER
 }
-

@@ -8,7 +8,7 @@ This application provides intelligent training plan generation based on Stephen 
 
 ## Technology Stack
 
-- **Java 21** with Spring Boot 3.3.0
+- **Java 21** with Spring Boot 4.0.1
 - **Spring Data JPA** with H2
 - **JUnit 5** (Kotlin tests) for TDD
 - **MapStruct** for object mapping
@@ -147,7 +147,7 @@ mvn checkstyle:check
 Once the application is running, access API documentation at:
 
 ```
-http://localhost:8080/swagger-ui.html
+http://localhost:8080/swagger-ui/index.html
 ```
 
 ## Security (Dev Defaults)

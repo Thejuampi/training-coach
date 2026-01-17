@@ -78,7 +78,8 @@ public class RestTrainingCoachGateway implements TrainingCoachGateway {
                 .post()
                 .uri("/api/users")
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(new CreateUserRequest(name, normalizedRole, UserPreferences.metricDefaults(), username, password))
+                .bodyValue(new CreateUserRequest(
+                        name, normalizedRole, UserPreferences.metricDefaults(), username, password))
                 .retrieve()
                 .bodyToMono(SystemUser.class)
                 .block();
@@ -105,7 +106,8 @@ public class RestTrainingCoachGateway implements TrainingCoachGateway {
                 .retrieve()
                 .bodyToMono(RotatePasswordResponse.class)
                 .block();
-        return Objects.requireNonNull(response, "Rotate password response was null").password();
+        return Objects.requireNonNull(response, "Rotate password response was null")
+                .password();
     }
 
     @Override
@@ -149,11 +151,7 @@ public class RestTrainingCoachGateway implements TrainingCoachGateway {
     private record GeneratePlanRequest(Athlete athlete, String phase, LocalDate startDate, Hours targetWeeklyHours) {}
 
     private record CreateUserRequest(
-            String name,
-            String role,
-            UserPreferences preferences,
-            String username,
-            String password) {}
+            String name, String role, UserPreferences preferences, String username, String password) {}
 
     private record LoginRequest(String username, String password) {}
 

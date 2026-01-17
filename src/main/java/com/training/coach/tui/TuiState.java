@@ -1,7 +1,7 @@
 package com.training.coach.tui;
 
-import com.training.coach.user.domain.model.UserRole;
 import com.training.coach.athlete.domain.model.TrainingPlan;
+import com.training.coach.user.domain.model.UserRole;
 
 public class TuiState {
 

@@ -25,4 +25,3 @@ public class TuiNavigator {
         renderer.render(supplier.get());
     }
 }
-

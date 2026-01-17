@@ -7,4 +7,3 @@ public enum ThresholdMethod {
     ESTIMATED,
     MANUAL
 }
-

@@ -5,7 +5,9 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "user_credentials", indexes = {@Index(name = "idx_user_credentials_username", columnList = "username")})
+@Table(
+        name = "user_credentials",
+        indexes = {@Index(name = "idx_user_credentials_username", columnList = "username")})
 public class UserCredentialsEntity {
 
     @Id
@@ -102,4 +104,3 @@ public class UserCredentialsEntity {
         this.updatedAt = updatedAt;
     }
 }
-

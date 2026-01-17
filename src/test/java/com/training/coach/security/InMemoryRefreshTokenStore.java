@@ -13,8 +13,8 @@ class InMemoryRefreshTokenStore implements RefreshTokenStore {
 
     @Override
     public RefreshTokenRecord save(RefreshTokenRecord record) {
-        byId.put(record.getId(), record);
-        idByHash.put(record.getTokenHash(), record.getId());
+        byId.put(record.id(), record);
+        idByHash.put(record.tokenHash(), record.id());
         return record;
     }
 
@@ -30,7 +30,7 @@ class InMemoryRefreshTokenStore implements RefreshTokenStore {
     @Override
     public List<RefreshTokenRecord> findByFamilyId(String familyId) {
         return byId.values().stream()
-                .filter(record -> record.getFamilyId().equals(familyId))
+                .filter(record -> record.familyId().equals(familyId))
                 .collect(Collectors.toList());
     }
 }

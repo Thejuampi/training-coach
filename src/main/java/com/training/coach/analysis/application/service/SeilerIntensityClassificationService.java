@@ -51,4 +51,3 @@ public class SeilerIntensityClassificationService {
                 Math.min(thresholds.confidence(), 0.25));
     }
 }
-

@@ -50,10 +50,6 @@ public class UserCredentialsRepositoryAdapter implements UserCredentialsReposito
 
     private CredentialsRecord toRecord(UserCredentialsEntity entity) {
         return new CredentialsRecord(
-                entity.getId(),
-                entity.getUserId(),
-                entity.getUsername(),
-                entity.getPasswordHash(),
-                entity.isEnabled());
+                entity.getId(), entity.getUserId(), entity.getUsername(), entity.getPasswordHash(), entity.isEnabled());
     }
 }

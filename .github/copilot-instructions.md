@@ -7,8 +7,7 @@
 - Configuration profiles live in `src/main/resources/application*.yml` and `src/test/resources/application-test.yml`.
 - Testing: JUnit 5 unit tests in `src/test/java`, Cucumber acceptance tests in `src/test/kotlin/com/training/coach/acceptance` with Gherkin features in `src/test/resources/features`.
 - Code style: Spotless (Palantir Java Format) runs in `verify`. If formatting fails, run `mvn spotless:apply` before re-running the build.
-
-References:
+- OpenCode Configuration: Agents are defined in `opencode.jsonc` at the project root. To troubleshoot loading issues, run `opencode models` to list available models and providers. Ensure all agent models use valid combinations (e.g., `github-copilot/gpt-5.2-codex`); avoid invalid providers like "anthropic" or unavailable models like "gpt-5.2" (use the latest listed versions).
 - README: build/test commands and environment variables.
 - Architecture overview: `docs/ARCHITECTURE.md`.
 - Ports/adapters example: `src/main/java/com/training/coach/athlete/application/port/out/FitnessPlatformPort.java` and `src/main/java/com/training/coach/athlete/infrastructure/adapter/IntervalsIcuAdapter.java`.

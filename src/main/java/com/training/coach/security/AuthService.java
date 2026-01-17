@@ -1,7 +1,7 @@
 package com.training.coach.security;
 
+import com.training.coach.user.application.port.out.SystemUserRepository;
 import com.training.coach.user.domain.model.SystemUser;
-import com.training.coach.user.infrastructure.persistence.SystemUserJpaRepository;
 import com.training.coach.user.infrastructure.persistence.UserCredentialsJpaRepository;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -25,7 +25,7 @@ public class AuthService {
     private final JwtEncoder encoder;
     private final RefreshTokenStore refreshTokenStore;
     private final UserCredentialsJpaRepository credentialsRepository;
-    private final SystemUserJpaRepository userRepository;
+    private final SystemUserRepository userRepository;
 
     public AuthService(
             PasswordEncoder passwordEncoder,
@@ -33,7 +33,7 @@ public class AuthService {
             JwtEncoder encoder,
             RefreshTokenStore refreshTokenStore,
             UserCredentialsJpaRepository credentialsRepository,
-            SystemUserJpaRepository userRepository) {
+            SystemUserRepository userRepository) {
         this.passwordEncoder = passwordEncoder;
         this.properties = properties;
         this.encoder = encoder;
@@ -57,7 +57,8 @@ public class AuthService {
                 .findById(credentials.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
         String accessToken = issueAccessToken(user);
-        IssuedRefreshToken refreshToken = issueRefreshToken(user.id(), UUID.randomUUID().toString());
+        IssuedRefreshToken refreshToken =
+                issueRefreshToken(user.id(), UUID.randomUUID().toString());
         return new AuthTokens(accessToken, refreshToken.raw(), properties.accessTokenTtlSeconds());
     }
 
@@ -67,18 +68,18 @@ public class AuthService {
         RefreshTokenStore.RefreshTokenRecord token = refreshTokenStore
                 .findByTokenHash(hash)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid refresh token"));
-        if (token.getRevokedAt() != null) {
-            revokeFamily(token.getFamilyId());
+        if (token.revokedAt() != null) {
+            revokeFamily(token.familyId());
             throw new IllegalArgumentException("Refresh token revoked");
         }
-        if (token.getExpiresAt().isBefore(Instant.now())) {
+        if (token.expiresAt().isBefore(Instant.now())) {
             token = token.withRevokedAt(Instant.now());
             refreshTokenStore.save(token);
             throw new IllegalArgumentException("Refresh token expired");
         }
 
-        SystemUser user = loadUser(token.getUserId());
-        IssuedRefreshToken newRefreshToken = issueRefreshToken(user.id(), token.getFamilyId());
+        SystemUser user = loadUser(token.userId());
+        IssuedRefreshToken newRefreshToken = issueRefreshToken(user.id(), token.familyId());
         token = token.withRevokedAt(Instant.now()).withReplacedBy(newRefreshToken.recordId());
         refreshTokenStore.save(token);
 
@@ -92,7 +93,7 @@ public class AuthService {
                 .findByTokenHash(hash)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid refresh token"));
         if (allSessions) {
-            revokeFamily(token.getFamilyId());
+            revokeFamily(token.familyId());
             return;
         }
         token = token.withRevokedAt(Instant.now());
@@ -101,15 +102,13 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public SystemUser loadUser(String userId) {
-        return userRepository
-                .findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        return userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
 
     private void revokeFamily(String familyId) {
         List<RefreshTokenStore.RefreshTokenRecord> tokens = refreshTokenStore.findByFamilyId(familyId);
         for (RefreshTokenStore.RefreshTokenRecord token : tokens) {
-            if (token.getRevokedAt() == null) {
+            if (token.revokedAt() == null) {
                 refreshTokenStore.save(token.withRevokedAt(Instant.now()));
             }
         }
@@ -130,7 +129,8 @@ public class AuthService {
     }
 
     private IssuedRefreshToken issueRefreshToken(String userId, String familyId) {
-        String raw = Base64.getUrlEncoder().withoutPadding()
+        String raw = Base64.getUrlEncoder()
+                .withoutPadding()
                 .encodeToString(UUID.randomUUID().toString().getBytes(StandardCharsets.UTF_8));
         String recordId = UUID.randomUUID().toString();
         RefreshTokenStore.RefreshTokenRecord record = new RefreshTokenStore.RefreshTokenRecord(

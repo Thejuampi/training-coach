@@ -19,17 +19,29 @@ public class SeilerWorkoutPrescriptionService {
             case Z1_RECOVERY -> new WorkoutIntensityPrescription(
                     purpose, 0.40, 0.55, PrescriptionMethod.PERCENT_FTP_PROXY, 0.3, "Very easy recovery below LT1");
             case Z1_ENDURANCE -> new WorkoutIntensityPrescription(
-                    purpose, 0.55, 0.75, PrescriptionMethod.PERCENT_FTP_PROXY, 0.3, "Steady aerobic endurance below LT1");
+                    purpose,
+                    0.56,
+                    0.73,
+                    PrescriptionMethod.PERCENT_FTP_PROXY,
+                    0.3,
+                    "Steady aerobic endurance below LT1");
             case Z1_FATMAX -> new WorkoutIntensityPrescription(
                     purpose,
-                    0.70,
-                    0.85,
+                    0.74,
+                    0.82,
                     PrescriptionMethod.PERCENT_FTP_PROXY,
                     0.2,
                     "Upper Z1 band below LT1, often near FATMAX for an athlete");
+            case Z2_DISCOURAGED_TEMPO -> new WorkoutIntensityPrescription(
+                    purpose,
+                    0.83,
+                    0.87,
+                    PrescriptionMethod.PERCENT_FTP_PROXY,
+                    0.2,
+                    "Discouraged tempo band in polarized models; use sparingly");
             case Z2_THRESHOLD -> new WorkoutIntensityPrescription(
                     purpose,
-                    0.85,
+                    0.88,
                     1.00,
                     PrescriptionMethod.PERCENT_FTP_PROXY,
                     0.3,
@@ -43,7 +55,7 @@ public class SeilerWorkoutPrescriptionService {
                     "VO2-oriented intervals (cycling), distinct from sprint work");
             case Z3_SPRINT -> new WorkoutIntensityPrescription(
                     purpose,
-                    1.15,
+                    1.16,
                     2.00,
                     PrescriptionMethod.PERCENT_FTP_PROXY,
                     0.4,
@@ -72,13 +84,16 @@ public class SeilerWorkoutPrescriptionService {
         if (percentFtp >= 1.05) {
             return WorkoutIntensityPurpose.Z3_VO2_OPTIMAL;
         }
-        if (percentFtp >= 0.85) {
+        if (percentFtp >= 0.88) {
             return WorkoutIntensityPurpose.Z2_THRESHOLD;
         }
-        if (percentFtp >= 0.70) {
+        if (percentFtp >= 0.83) {
+            return WorkoutIntensityPurpose.Z2_DISCOURAGED_TEMPO;
+        }
+        if (percentFtp >= 0.74) {
             return WorkoutIntensityPurpose.Z1_FATMAX;
         }
-        if (percentFtp >= 0.55) {
+        if (percentFtp >= 0.56) {
             return WorkoutIntensityPurpose.Z1_ENDURANCE;
         }
         return WorkoutIntensityPurpose.Z1_RECOVERY;

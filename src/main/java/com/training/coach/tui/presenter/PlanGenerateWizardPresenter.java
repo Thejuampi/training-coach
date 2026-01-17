@@ -7,8 +7,8 @@ import com.training.coach.tui.application.port.TrainingCoachGateway;
 import com.training.coach.tui.ui.TuiNavigator;
 import com.training.coach.tui.ui.UiButtonSpec;
 import com.training.coach.tui.ui.UiLabelSpec;
-import com.training.coach.tui.ui.UiSpec;
 import com.training.coach.tui.ui.UiSpacerSpec;
+import com.training.coach.tui.ui.UiSpec;
 import com.training.coach.tui.ui.UiTextInputSpec;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -39,18 +39,10 @@ public class PlanGenerateWizardPresenter {
             components.add(new UiSpacerSpec(1));
         }
 
+        components.add(new UiTextInputSpec("Athlete ID", () -> nullToEmpty(state.athleteId()), state::setAthleteId));
+        components.add(new UiTextInputSpec("Phase", () -> nullToEmpty(state.planPhase()), state::setPlanPhase));
         components.add(new UiTextInputSpec(
-                "Athlete ID",
-                () -> nullToEmpty(state.athleteId()),
-                state::setAthleteId));
-        components.add(new UiTextInputSpec(
-                "Phase",
-                () -> nullToEmpty(state.planPhase()),
-                state::setPlanPhase));
-        components.add(new UiTextInputSpec(
-                "Start Date (YYYY-MM-DD)",
-                () -> nullToEmpty(state.planStartDate()),
-                state::setPlanStartDate));
+                "Start Date (YYYY-MM-DD)", () -> nullToEmpty(state.planStartDate()), state::setPlanStartDate));
         components.add(new UiTextInputSpec(
                 "Target Weekly Hours",
                 () -> nullToEmpty(state.planTargetWeeklyHours()),
@@ -101,8 +93,7 @@ public class PlanGenerateWizardPresenter {
 
         try {
             Athlete athlete = gateway.getAthlete(athleteId);
-            state.setLastGeneratedPlan(
-                    gateway.generateTrainingPlan(athlete, phase, startDate, Hours.of(weeklyHours)));
+            state.setLastGeneratedPlan(gateway.generateTrainingPlan(athlete, phase, startDate, Hours.of(weeklyHours)));
             state.setPlanError(null);
             navigator.show("plans:preview");
         } catch (RuntimeException ex) {

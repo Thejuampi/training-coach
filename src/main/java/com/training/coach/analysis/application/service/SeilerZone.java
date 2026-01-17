@@ -5,4 +5,3 @@ public enum SeilerZone {
     Z2,
     Z3
 }
-

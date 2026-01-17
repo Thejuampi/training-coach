@@ -4,8 +4,8 @@ import com.training.coach.tui.TuiState;
 import com.training.coach.tui.ui.TuiNavigator;
 import com.training.coach.tui.ui.UiButtonSpec;
 import com.training.coach.tui.ui.UiLabelSpec;
-import com.training.coach.tui.ui.UiSpec;
 import com.training.coach.tui.ui.UiSpacerSpec;
+import com.training.coach.tui.ui.UiSpec;
 import com.training.coach.tui.ui.UiTextInputSpec;
 import java.util.List;
 
@@ -29,4 +29,3 @@ public class ConnectionPresenter {
                         new UiButtonSpec("Continue", () -> navigator.show("session"))));
     }
 }
-

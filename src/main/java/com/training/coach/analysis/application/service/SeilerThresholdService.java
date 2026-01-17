@@ -19,4 +19,3 @@ public class SeilerThresholdService {
         return Optional.ofNullable(thresholdsByAthleteId.get(athleteId));
     }
 }
-

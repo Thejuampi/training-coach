@@ -9,8 +9,8 @@ public enum WorkoutIntensityPurpose {
     Z1_RECOVERY,
     Z1_ENDURANCE,
     Z1_FATMAX,
+    Z2_DISCOURAGED_TEMPO,
     Z2_THRESHOLD,
     Z3_VO2_OPTIMAL,
     Z3_SPRINT
 }
-

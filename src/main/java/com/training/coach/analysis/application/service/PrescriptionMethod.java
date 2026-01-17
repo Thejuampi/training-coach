@@ -5,4 +5,3 @@ public enum PrescriptionMethod {
     PERCENT_FTP_PROXY,
     MANUAL
 }
-

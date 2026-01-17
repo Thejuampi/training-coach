@@ -6,8 +6,8 @@ import com.training.coach.tui.ui.TuiNavigator;
 import com.training.coach.tui.ui.UiButtonSpec;
 import com.training.coach.tui.ui.UiLabelSpec;
 import com.training.coach.tui.ui.UiRadioSpec;
-import com.training.coach.tui.ui.UiSpec;
 import com.training.coach.tui.ui.UiSpacerSpec;
+import com.training.coach.tui.ui.UiSpec;
 import com.training.coach.tui.ui.UiTextInputSpec;
 import com.training.coach.user.domain.model.UserRole;
 import java.util.List;
@@ -30,9 +30,7 @@ public class SessionPresenter {
                 List.of(
                         new UiLabelSpec(messageOrDefault()),
                         new UiTextInputSpec(
-                                "Base URL (REST API)",
-                                () -> nullToEmpty(state.baseUrl()),
-                                state::setBaseUrl),
+                                "Base URL (REST API)", () -> nullToEmpty(state.baseUrl()), state::setBaseUrl),
                         new UiSpacerSpec(1),
                         new UiLabelSpec("Select Role:"),
                         new UiRadioSpec<>(
@@ -42,14 +40,8 @@ public class SessionPresenter {
                                 state::setUserRole,
                                 UserRole::name),
                         new UiSpacerSpec(1),
-                        new UiTextInputSpec(
-                                "Username",
-                                () -> nullToEmpty(state.username()),
-                                state::setUsername),
-                        new UiTextInputSpec(
-                                "Password",
-                                () -> nullToEmpty(state.password()),
-                                state::setPassword),
+                        new UiTextInputSpec("Username", () -> nullToEmpty(state.username()), state::setUsername),
+                        new UiTextInputSpec("Password", () -> nullToEmpty(state.password()), state::setPassword),
                         new UiTextInputSpec("User ID (optional)", () -> nullToEmpty(state.userId()), state::setUserId),
                         new UiTextInputSpec(
                                 "Athlete ID (optional)", () -> nullToEmpty(state.athleteId()), state::setAthleteId),

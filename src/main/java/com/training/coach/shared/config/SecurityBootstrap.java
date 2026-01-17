@@ -13,8 +13,7 @@ public class SecurityBootstrap {
 
     @Bean
     public CommandLineRunner bootstrapAdmin(
-            UserCredentialsRepository credentialsRepository,
-            SystemUserService userService) {
+            UserCredentialsRepository credentialsRepository, SystemUserService userService) {
         return args -> {
             if (credentialsRepository.findByUsername(defaultAdminUsername()).isPresent()) {
                 return;

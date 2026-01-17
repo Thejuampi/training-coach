@@ -31,4 +31,3 @@ public record SeilerZoneDistribution(Minutes z1Minutes, Minutes z2Minutes, Minut
         return total == 0 ? 0.0 : (double) z3Minutes.value() / total * 100.0;
     }
 }
-

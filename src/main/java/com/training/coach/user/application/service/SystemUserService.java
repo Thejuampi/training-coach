@@ -6,13 +6,13 @@ import com.training.coach.user.application.port.out.UserCredentialsRepository;
 import com.training.coach.user.domain.model.SystemUser;
 import com.training.coach.user.domain.model.UserPreferences;
 import com.training.coach.user.domain.model.UserRole;
-import java.util.UUID;
-import org.springframework.stereotype.Service;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 @Service
 public class SystemUserService {
@@ -93,8 +93,8 @@ public class SystemUserService {
     public Result<UserCredentialsSummary> getCredentialsSummary(String userId) {
         return credentialsRepository
                 .findByUserId(userId)
-                .map(record -> Result.success(new UserCredentialsSummary(
-                        record.userId(), record.username(), record.enabled())))
+                .map(record -> Result.success(
+                        new UserCredentialsSummary(record.userId(), record.username(), record.enabled())))
                 .orElse(Result.failure(new IllegalArgumentException("Credentials not found for: " + userId)));
     }
 

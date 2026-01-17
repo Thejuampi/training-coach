@@ -99,5 +99,7 @@ public class IntensityController {
     public record ClassifyPurposeRequest(double percentFtp) {}
 
     public record ClassifyPurposeResponse(
-            WorkoutIntensityPurpose purpose, com.training.coach.analysis.application.service.PrescriptionMethod method, double confidence) {}
+            WorkoutIntensityPurpose purpose,
+            com.training.coach.analysis.application.service.PrescriptionMethod method,
+            double confidence) {}
 }

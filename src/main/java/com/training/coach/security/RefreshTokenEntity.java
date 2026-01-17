@@ -5,10 +5,12 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "refresh_tokens", indexes = {
-        @Index(name = "idx_refresh_tokens_hash", columnList = "token_hash", unique = true),
-        @Index(name = "idx_refresh_tokens_family", columnList = "family_id")
-})
+@Table(
+        name = "refresh_tokens",
+        indexes = {
+            @Index(name = "idx_refresh_tokens_hash", columnList = "token_hash", unique = true),
+            @Index(name = "idx_refresh_tokens_family", columnList = "family_id")
+        })
 public class RefreshTokenEntity {
 
     @Id

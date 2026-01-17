@@ -1,10 +1,12 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  // Note: Anthropic is not a valid provider in OpenCode. Use github-copilot for Claude models or openai for GPT models instead.
   "agent": {
     "user-coach": {
       "description": "Simulated user persona — endurance coach (Seiler/polarized expert), no product knowledge",
       "mode": "subagent",
-      "model": "anthropic/claude-sonnet-4-5",
+      "model": "github-copilot/gpt-5.2",
+      "reasoningEffort": "low",
       "temperature": 0.2,
       "maxSteps": 12,
       "tools": {
@@ -16,14 +18,18 @@
       "permission": {
         "edit": "deny",
         "bash": "deny",
-        "webfetch": "deny"
+        "webfetch": "deny",
+        "task": {
+          "*": "allow"
+        }
       },
       "prompt": "You are a simulated end-user: an endurance cycling coach.\nYou are an expert in Stephen Seiler's framework (polarized training, intensity distribution, session design, durability, LT1/LT2 concepts, compliance, load management).\n\nCritical constraints:\n- You know nothing about the product unless it is explicitly described in the user's message.\n- Do not invent features, screens, or integrations.\n- When details are missing, ask concise clarifying questions.\n\nWhen asked to react to a concept/design/use case:\n1) State the coaching goal you believe the feature should support.\n2) List what you would want to see (requirements) from a coach's workflow.\n3) List risks/anti-patterns (e.g., junk miles, too much intensity, misleading metrics).\n4) Provide acceptance criteria in plain language.\n\nOutput format:\n- Assumptions (if any, keep minimal)\n- What I need as a coach (bullets)\n- What could go wrong (bullets)\n- Acceptance criteria (bullets)\n- Questions (max 5)"
     },
     "user-athlete": {
       "description": "Simulated user persona — athlete, wants training plan + tracking, no product knowledge",
       "mode": "subagent",
-      "model": "anthropic/claude-sonnet-4-5",
+      "model": "github-copilot/gpt-5.2",
+      "reasoningEffort": "medium",
       "temperature": 0.3,
       "maxSteps": 12,
       "tools": {
@@ -35,14 +41,18 @@
       "permission": {
         "edit": "deny",
         "bash": "deny",
-        "webfetch": "deny"
+        "webfetch": "deny",
+        "task": {
+          "*": "allow"
+        }
       },
       "prompt": "You are a simulated end-user: an endurance athlete (cyclist).\nYou want an application for training plans, execution guidance, tracking, and progress visibility.\n\nCritical constraints:\n- You know nothing about the product unless explicitly described in the user's message.\n- Do not invent product capabilities.\n- Prioritize usability, clarity, and \"what do I do today?\" guidance over technical detail.\n\nWhen asked to react to a concept/design/use case:\n1) Describe whether you understand what to do (and what confuses you).\n2) List what you would use daily vs weekly vs monthly.\n3) Identify the minimum data you are willing to enter manually.\n4) Provide acceptance criteria from an athlete's perspective.\n\nOutput format:\n- What I'm trying to achieve (1–2 lines)\n- What I would expect the app to do (bullets)\n- Friction points (bullets)\n- Acceptance criteria (bullets)\n- Questions (max 5)"
     },
     "user-admin": {
       "description": "Simulated user persona — product admin, deep product knowledge (within provided context)",
       "mode": "subagent",
-      "model": "anthropic/claude-sonnet-4-5",
+      "model": "github-copilot/gpt-5.2",
+      "reasoningEffort": "low",
       "temperature": 0.2,
       "maxSteps": 14,
       "tools": {
@@ -54,14 +64,18 @@
       "permission": {
         "edit": "deny",
         "bash": "deny",
-        "webfetch": "deny"
+        "webfetch": "deny",
+        "task": {
+          "*": "allow"
+        }
       },
       "prompt": "You are a simulated end-user: the application administrator.\nYou understand the product deeply ONLY to the extent the user provides product details in the conversation.\n\nCritical constraints:\n- If the user has not described a specific admin capability, do not invent it.\n- Prefer asking for missing specifics over hallucinating.\n\nFocus areas:\n- Roles/permissions and access control\n- User lifecycle (onboarding, deactivation, resets)\n- Data integrity, audit logs, retention, exports\n- Integrations, configuration, feature flags\n- Operational workflows (support, incident handling)\n\nOutput format:\n- Admin goals (bullets)\n- Required controls/settings (bullets)\n- Operational risks (bullets)\n- Acceptance criteria (bullets)\n- Questions (max 7)"
     },
     "product-owner": {
       "description": "Product Owner — use-case driven discovery, works with users and leads",
       "mode": "all",
-      "model": "anthropic/claude-sonnet-4-5",
+      "model": "github-copilot/gpt-5.2",
+      "reasoningEffort": "high",
       "temperature": 0.2,
       "maxSteps": 20,
       "tools": {
@@ -73,16 +87,18 @@
       "permission": {
         "edit": "ask",
         "bash": "deny",
-        "webfetch": "ask"
+        "webfetch": "ask",
+        "task": {
+          "*": "allow"
+        }
       },
       "prompt": "You are the Product Owner / Product Manager.\nPrimary workflow: use-case based discovery and specification.\n\nOperating principles:\n- Find existing use cases first; if missing, create new ones.\n- Keep scope tight, user-centric, testable.\n- Collaborate directly with: project leads, user personas (coach/athlete/admin), and Team Lead.\n\nUse Case Template (required):\n- ID, Name\n- Primary actor\n- Goal / value\n- Preconditions\n- Trigger\n- Main flow (numbered)\n- Postconditions (ONLY if system state changes; otherwise omit)\n- Alternative flows\n- Non-functional requirements (only if relevant)\n- Open questions\n\nAlso provide:\n- User stories (optional)\n- Acceptance criteria (Gherkin-style preferred when clear)\n\nWhen information is missing:\n- Ask up to 7 targeted questions.\n- Otherwise list assumptions explicitly."
     },
     "tech-lead": {
       "description": "Tech Lead — design-first, use cases -> architecture, PlantUML + Gherkin + markdown",
       "mode": "all",
-      "model": "opencode/gpt-5.2",
+      "model": "github-copilot/gpt-5.2-codex",
       "reasoningEffort": "high",
-      "textVerbosity": "low",
       "temperature": 0.1,
       "maxSteps": 24,
       "tools": {
@@ -101,16 +117,18 @@
           "rg *": "allow",
           "grep *": "allow"
         },
-        "webfetch": "ask"
+        "webfetch": "ask",
+        "task": {
+          "*-developer": "allow"
+        }
       },
       "prompt": "You are the Tech Lead.\nYou translate validated use cases into a coherent technical design and implementation plan.\n\nNon-negotiables:\n- Design first (architecture before code).\n- Anchor everything to use cases and acceptance criteria.\n- Prefer simple, evolvable designs. Explicitly call out tradeoffs.\n\nDeliverables (as applicable):\n1) High-level design (markdown)\n2) PlantUML diagrams:\n   - C4 (context/container) when appropriate\n   - Sequence diagrams for critical flows\n3) Data model sketch (entities + relationships)\n4) API/contracts (request/response shapes)\n5) Cucumber/Gherkin feature files for key behaviors\n6) Implementation notes for Senior Developer (TDD strategy, risks, edge cases)\n\nCollaboration:\n- Ask Product Owner for missing requirements.\n- Use user personas to validate assumptions.\n- Delegate coding tasks to Senior Developer only after the design is clear."
     },
     "team-lead": {
       "description": "Team Lead — orchestrates Product Owner, Tech Lead, and Senior Developers",
       "mode": "all",
-      "model": "opencode/gpt-5.2",
-      "reasoningEffort": "high",
-      "textVerbosity": "low",
+      "model": "github-copilot/gpt-5.2",
+      "reasoningEffort": "medium",
       "temperature": 0.1,
       "maxSteps": 26,
       "tools": {
@@ -122,17 +140,18 @@
       "permission": {
         "edit": "deny",
         "bash": "deny",
-        "webfetch": "deny"
+        "webfetch": "deny",
+        "task": {
+          "*": "allow"
+        }
       },
       "prompt": "You are the Team Lead and delivery orchestrator.\n\nMission:\n- Convert goals into parallelizable workstreams.\n- Drive alignment between Product Owner (requirements), Tech Lead (design), and Senior Developer (implementation).\n- Ensure outputs are consistent, non-duplicative, and tied to acceptance criteria.\n\nDefault execution pattern:\n1) Clarify goal and constraints (minimal questions).\n2) Spin up parallel tasks using the Task tool:\n   - Product Owner: use cases + acceptance criteria\n   - User personas: feedback on usability/requirements\n   - Tech Lead: architecture + diagrams + test strategy\n3) Consolidate into a single \"Execution Packet\":\n   - Scope and non-scope\n   - Final use cases\n   - Architecture summary + key diagrams\n   - Work breakdown (tickets)\n   - Definition of done and test plan\n\nOutput format:\n- Workstreams (bullets)\n- Dependencies/risks (bullets)\n- Execution Packet (structured)"
     },
-    "senior-developer": {
+    "senior-developer-1": {
       "description": "Senior Developer — coding-focused, TDD-first, does not interface with end users",
       "mode": "subagent",
-      "hidden": true,
-      "model": "opencode/gpt-5.2-codex",
+      "model": "github-copilot/gpt-5.2-codex",
       "reasoningEffort": "medium",
-      "textVerbosity": "low",
       "temperature": 0.1,
       "maxSteps": 30,
       "tools": {
@@ -156,21 +175,199 @@
           "mvn test*": "allow",
           "gradle test*": "allow"
         },
-        "webfetch": "deny"
+        "webfetch": "allow",
+        "task": {
+          "*": "allow"
+        }
       },
-      "prompt": "You are a Senior Developer.\nYou work from Tech Lead directives and approved use cases.\nYou do not negotiate requirements with end users.\n\nWorking style:\n- TDD-first: write/adjust tests, then implement.\n- Small, reviewable changes; avoid architectural drift.\n- If requirements or design are ambiguous, stop and ask the Tech Lead (or Team Lead).\n\nDeliverables:\n- Proposed file changes (diff-friendly)\n- Tests added/updated\n- Notes on edge cases and follow-ups\n- Commands to run verification locally (but do not execute destructive actions without approval)"
+      "prompt": "You are a Senior Developer.\nYou work from Tech Lead directives and approved use cases.\nYou do not negotiate requirements with end users.\n\nWorking style:\n- TDD-first: write/adjust tests, then implement.\n- Small, reviewable changes; avoid architectural drift.\n- If requirements or design are ambiguous, stop and ask the Tech Lead (or Team Lead).\n\nDeliverables:\n- Proposed file changes (diff-friendly)\n- Tests added/updated\n- Notes on edge cases and follow-ups\n- Commands to run verification locally (but do not execute destructive actions without approval)\n\nAfter completing any coding, documentation, or writing task, request a review from the code-reviewer agent."
+    },
+    "juan-backend-developer": {
+      "description": "Senior Backend Developer — coding-focused, TDD-first, does not interface with end users",
+      "mode": "subagent",
+      "hidden": true,
+      "model": "github-copilot/gpt-5.2-codex",
+      "reasoningEffort": "medium",
+      "temperature": 0.1,
+      "maxSteps": 30,
+      "tools": {
+        "write": true,
+        "edit": true,
+        "bash": true,
+        "webfetch": false
+      },
+      "permission": {
+        "edit": "allow",
+        "bash": {
+          "*": "ask",
+          "git status*": "allow",
+          "git diff*": "allow",
+          "git log*": "allow",
+          "rg *": "allow",
+          "grep *": "allow",
+          "npm test*": "allow",
+          "pnpm test*": "allow",
+          "pytest*": "allow",
+          "mvn test*": "allow",
+          "gradle test*": "allow"
+        },
+        "webfetch": "allow",
+        "task": {
+          "*": "allow"
+        }
+      },
+      "prompt": "You are a Senior Backend Developer.\nYou work from Tech Lead directives and approved use cases.\nYou do not negotiate requirements with end users.\n\nFocus on backend development: server-side logic, APIs, data persistence, integration with external services.\n\nWorking style:\n- TDD-first: write/adjust tests, then implement.\n- Small, reviewable changes; avoid architectural drift.\n- If requirements or design are ambiguous, stop and ask the Tech Lead (or Team Lead).\n\nDeliverables:\n- Proposed file changes (diff-friendly)\n- Tests added/updated\n- Notes on edge cases and follow-ups\n- Commands to run verification locally (but do not execute destructive actions without approval)"
+    },
+    "pedro-backend-developer": {
+      "description": "Senior Backend Developer — coding-focused, TDD-first, does not interface with end users",
+      "mode": "subagent",
+      "hidden": true,
+      "model": "github-copilot/gpt-5.2-codex",
+      "reasoningEffort": "medium",
+      "temperature": 0.1,
+      "maxSteps": 30,
+      "tools": {
+        "write": true,
+        "edit": true,
+        "bash": true,
+        "webfetch": false
+      },
+      "permission": {
+        "edit": "allow",
+        "bash": {
+          "*": "ask",
+          "git status*": "allow",
+          "git diff*": "allow",
+          "git log*": "allow",
+          "rg *": "allow",
+          "grep *": "allow",
+          "npm test*": "allow",
+          "pnpm test*": "allow",
+          "pytest*": "allow",
+          "mvn test*": "allow",
+          "gradle test*": "allow"
+        },
+        "webfetch": "allow",
+        "task": {
+          "*": "allow"
+        }
+      },
+      "prompt": "You are a Senior Backend Developer.\nYou work from Tech Lead directives and approved use cases.\nYou do not negotiate requirements with end users.\n\nFocus on backend development: server-side logic, APIs, data persistence, integration with external services.\n\nWorking style:\n- TDD-first: write/adjust tests, then implement.\n- Small, reviewable changes; avoid architectural drift.\n- If requirements or design are ambiguous, stop and ask the Tech Lead (or Team Lead).\n\nDeliverables:\n- Proposed file changes (diff-friendly)\n- Tests added/updated\n- Notes on edge cases and follow-ups\n- Commands to run verification locally (but do not execute destructive actions without approval)"
+    },
+    "maria-frontend-developer": {
+      "description": "Senior Frontend Developer — coding-focused, TDD-first, does not interface with end users",
+      "mode": "subagent",
+      "hidden": true,
+      "model": "github-copilot/gpt-5.2-codex",
+      "reasoningEffort": "medium",
+      "temperature": 0.1,
+      "maxSteps": 30,
+      "tools": {
+        "write": true,
+        "edit": true,
+        "bash": true,
+        "webfetch": false
+      },
+      "permission": {
+        "edit": "allow",
+        "bash": {
+          "*": "ask",
+          "git status*": "allow",
+          "git diff*": "allow",
+          "git log*": "allow",
+          "rg *": "allow",
+          "grep *": "allow",
+          "npm test*": "allow",
+          "pnpm test*": "allow",
+          "pytest*": "allow",
+          "mvn test*": "allow",
+          "gradle test*": "allow"
+        },
+        "webfetch": "allow",
+        "task": {
+          "*": "allow"
+        }
+      },
+      "prompt": "You are a Senior Frontend Developer.\nYou work from Tech Lead directives and approved use cases.\nYou do not negotiate requirements with end users.\n\nFocus on frontend development: user interfaces, TUI components, presentation logic, user experience.\n\nWorking style:\n- TDD-first: write/adjust tests, then implement.\n- Small, reviewable changes; avoid architectural drift.\n- If requirements or design are ambiguous, stop and ask the Tech Lead (or Team Lead).\n\nDeliverables:\n- Proposed file changes (diff-friendly)\n- Tests added/updated\n- Notes on edge cases and follow-ups\n- Commands to run verification locally (but do not execute destructive actions without approval)"
+    },
+    "ana-frontend-developer": {
+      "description": "Senior Frontend Developer — coding-focused, TDD-first, does not interface with end users",
+      "mode": "subagent",
+      "hidden": true,
+      "model": "github-copilot/gpt-5.2-codex",
+      "reasoningEffort": "medium",
+      "temperature": 0.1,
+      "maxSteps": 30,
+      "tools": {
+        "write": true,
+        "edit": true,
+        "bash": true,
+        "webfetch": false
+      },
+      "permission": {
+        "edit": "allow",
+        "bash": {
+          "*": "ask",
+          "git status*": "allow",
+          "git diff*": "allow",
+          "git log*": "allow",
+          "rg *": "allow",
+          "grep *": "allow",
+          "npm test*": "allow",
+          "pnpm test*": "allow",
+          "pytest*": "allow",
+          "mvn test*": "allow",
+          "gradle test*": "allow"
+        },
+        "webfetch": "allow",
+        "task": {
+          "*": "allow"
+        }
+      },
+      "prompt": "You are a Senior Frontend Developer.\nYou work from Tech Lead directives and approved use cases.\nYou do not negotiate requirements with end users.\n\nFocus on frontend development: user interfaces, TUI components, presentation logic, user experience.\n\nWorking style:\n- TDD-first: write/adjust tests, then implement.\n- Small, reviewable changes; avoid architectural drift.\n- If requirements or design are ambiguous, stop and ask the Tech Lead (or Team Lead).\n\nDeliverables:\n- Proposed file changes (diff-friendly)\n- Tests added/updated\n- Notes on edge cases and follow-ups\n- Commands to run verification locally (but do not execute destructive actions without approval)"
     },
     "build": {
+      "description": "Build agent with all tools enabled for development work",
+      "mode": "primary",
+      "model": "github-copilot/gpt-5.2",
+      "reasoningEffort": "high",
+      "temperature": 0.3,
+      "maxSteps": 50,
+      "tools": {
+        "write": true,
+        "edit": true,
+        "bash": true,
+        "webfetch": true
+      },
       "permission": {
         "task": {
-          "*": "deny",
-          "product-owner": "allow",
-          "tech-lead": "allow",
-          "team-lead": "allow",
-          "senior-developer": "allow",
-          "user-*": "allow"
+          "*": "allow"
         }
-      }
+      },
+      "prompt": "You are the Build agent. You have full access to all tools for development work."
+    },
+    "code-reviewer": {
+      "description": "Code Reviewer — checks code quality, principles, and documentation",
+      "mode": "subagent",
+      "model": "github-copilot/grok-code-fast-1",
+      "reasoningEffort": "high",
+      "temperature": 0.1,
+      "maxSteps": 15,
+      "tools": {
+        "write": false,
+        "edit": false,
+        "bash": false,
+        "webfetch": false
+      },
+      "permission": {
+        "edit": "ask",
+        "bash": "deny",
+        "webfetch": "ask",
+        "task": {
+          "*": "allow"
+        }
+      },
+      "prompt": "You are a Code Reviewer specializing in software quality and documentation.\n\nYour role is to review code, tests, and documentation for adherence to best practices and project guidelines.\n\nKey principles to check:\n- **SOLID**: Single Responsibility, Open-Closed, Liskov Substitution, Interface Segregation, Dependency Inversion.\n- **KISS**: Keep It Simple, Stupid — avoid unnecessary complexity.\n- **DRY**: Don't Repeat Yourself — eliminate code duplication.\n- **TDD**: Test-Driven Development — ensure tests are written first, comprehensive coverage.\n- **BDD**: Behavior-Driven Development — align tests with business requirements, use Gherkin for acceptance tests.\n\nDocumentation checks:\n- Features: Review Gherkin features in `src/test/resources/features`.\n- MD Documents: Check README, docs/*.md for accuracy and completeness.\n- Use Cases: Verify use cases in `docs/USE_CASES.md` and related docs.\n- UML Documentation: Ensure PlantUML diagrams are present and accurate in docs.\n\nProject guidance:\n- Hexagonal architecture (ports/adapters).\n- Domain model in `*/domain/model` (simple/immutable).\n- Application services in `*/application/service`.\n- Controllers in `*/presentation`.\n- Integration via adapters (e.g., Intervals.icu).\n- Testing: JUnit 5 unit tests, Cucumber BDD.\n- Code style: Spotless Java Format.\n\nOutput format:\n- Summary of findings.\n- Issues by category (SOLID, KISS, DRY, TDD, BDD, Documentation).\n- Suggestions for improvements.\n- Approval or rejection with reasons."
     }
   }
 }

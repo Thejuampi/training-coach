@@ -3,14 +3,14 @@ package com.training.coach.tui;
 import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
+import com.training.coach.tui.application.port.TrainingCoachGateway;
+import com.training.coach.tui.infrastructure.adapter.RestTrainingCoachGateway;
 import com.training.coach.tui.presenter.ConnectionPresenter;
 import com.training.coach.tui.presenter.MainMenuPresenter;
 import com.training.coach.tui.presenter.PlanGenerateWizardPresenter;
 import com.training.coach.tui.presenter.PlanPreviewPresenter;
 import com.training.coach.tui.presenter.SessionPresenter;
 import com.training.coach.tui.presenter.UserAdminPresenter;
-import com.training.coach.tui.application.port.TrainingCoachGateway;
-import com.training.coach.tui.infrastructure.adapter.RestTrainingCoachGateway;
 import com.training.coach.tui.ui.TuiNavigator;
 import com.training.coach.tui.ui.TuiRenderer;
 import java.io.IOException;
@@ -35,7 +35,7 @@ public class TuiApp {
         SessionPresenter sessionPresenter = new SessionPresenter(state, navigator, gateway);
         MainMenuPresenter mainMenuPresenter = new MainMenuPresenter(state, navigator);
         PlanGenerateWizardPresenter planGenerateWizardPresenter =
-            new PlanGenerateWizardPresenter(state, navigator, gateway);
+                new PlanGenerateWizardPresenter(state, navigator, gateway);
         PlanPreviewPresenter planPreviewPresenter = new PlanPreviewPresenter(state, navigator);
         UserAdminPresenter userAdminPresenter = new UserAdminPresenter(state, navigator, gateway);
 

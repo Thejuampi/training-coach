@@ -5,9 +5,9 @@ import com.training.coach.tui.application.port.TrainingCoachGateway;
 import com.training.coach.tui.ui.TuiNavigator;
 import com.training.coach.tui.ui.UiButtonSpec;
 import com.training.coach.tui.ui.UiLabelSpec;
-import com.training.coach.tui.ui.UiSpec;
-import com.training.coach.tui.ui.UiSpacerSpec;
 import com.training.coach.tui.ui.UiRadioSpec;
+import com.training.coach.tui.ui.UiSpacerSpec;
+import com.training.coach.tui.ui.UiSpec;
 import com.training.coach.tui.ui.UiTextInputSpec;
 import com.training.coach.user.domain.model.SystemUser;
 import com.training.coach.user.domain.model.UserRole;
@@ -53,22 +53,28 @@ public class UserAdminPresenter {
 
         components.add(new UiSpacerSpec(1));
         components.add(new UiLabelSpec("Create User"));
-        components.add(new UiTextInputSpec("Name", () -> nullToEmpty(state.adminNewUserName()), state::setAdminNewUserName));
+        components.add(
+                new UiTextInputSpec("Name", () -> nullToEmpty(state.adminNewUserName()), state::setAdminNewUserName));
         components.add(new UiRadioSpec<>(
                 "Role",
                 List.of(UserRole.COACH, UserRole.ATHLETE, UserRole.ADMIN),
                 () -> parseRole(state.adminNewUserRole()),
                 role -> state.setAdminNewUserRole(role.name()),
                 UserRole::name));
-        components.add(new UiTextInputSpec("Username", () -> nullToEmpty(state.adminNewUserUsername()), state::setAdminNewUserUsername));
-        components.add(new UiTextInputSpec("Password", () -> nullToEmpty(state.adminNewUserPassword()), state::setAdminNewUserPassword));
+        components.add(new UiTextInputSpec(
+                "Username", () -> nullToEmpty(state.adminNewUserUsername()), state::setAdminNewUserUsername));
+        components.add(new UiTextInputSpec(
+                "Password", () -> nullToEmpty(state.adminNewUserPassword()), state::setAdminNewUserPassword));
         components.add(new UiButtonSpec("Create User", this::createUser));
 
         components.add(new UiSpacerSpec(1));
         components.add(new UiLabelSpec("Manage Credentials"));
-        components.add(new UiTextInputSpec("Target User ID", () -> nullToEmpty(state.adminTargetUserId()), state::setAdminTargetUserId));
-        components.add(new UiTextInputSpec("New Password", () -> nullToEmpty(state.adminNewPassword()), state::setAdminNewPassword));
-        components.add(new UiTextInputSpec("Confirm (type YES)", () -> nullToEmpty(state.adminConfirmAction()), state::setAdminConfirmAction));
+        components.add(new UiTextInputSpec(
+                "Target User ID", () -> nullToEmpty(state.adminTargetUserId()), state::setAdminTargetUserId));
+        components.add(new UiTextInputSpec(
+                "New Password", () -> nullToEmpty(state.adminNewPassword()), state::setAdminNewPassword));
+        components.add(new UiTextInputSpec(
+                "Confirm (type YES)", () -> nullToEmpty(state.adminConfirmAction()), state::setAdminConfirmAction));
         components.add(new UiButtonSpec("Set Password", this::setPassword));
         components.add(new UiButtonSpec("Rotate Password", this::rotatePassword));
         components.add(new UiButtonSpec("Disable User", this::disableUser));
