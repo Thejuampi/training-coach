@@ -2,6 +2,9 @@ package com.training.coach.tui;
 
 import com.training.coach.tui.dto.TrainingPlan;
 import com.training.coach.tui.dto.UserRole;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class TuiState {
 
@@ -13,6 +16,8 @@ public class TuiState {
     private String sessionMessage;
     private String userId;
     private UserRole userRole = UserRole.COACH;
+    private List<UserRole> userRoles = new ArrayList<>();
+    private String subject;
     private String athleteId;
     private String planPhase;
     private String planStartDate;
@@ -90,6 +95,26 @@ public class TuiState {
 
     public void setUserRole(UserRole userRole) {
         this.userRole = userRole;
+    }
+
+    public List<UserRole> userRoles() {
+        return Collections.unmodifiableList(userRoles);
+    }
+
+    public void setUserRoles(List<UserRole> userRoles) {
+        if (userRoles == null) {
+            this.userRoles = new ArrayList<>();
+        } else {
+            this.userRoles = new ArrayList<>(userRoles);
+        }
+    }
+
+    public String subject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
     }
 
     public String athleteId() {
