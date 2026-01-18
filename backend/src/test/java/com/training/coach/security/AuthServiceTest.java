@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
+import com.training.coach.common.AuthTokens;
 import com.training.coach.user.application.port.out.SystemUserRepository;
 import com.training.coach.user.domain.model.SystemUser;
 import com.training.coach.user.domain.model.UserPreferences;
@@ -42,7 +43,7 @@ class AuthServiceTest {
         AuthService service = new AuthService(
                 passwordEncoder, jwtProps, keyProvider.encoder(), refreshRepo, credentialsRepo, userRepo);
 
-        AuthService.AuthTokens tokens = service.authenticate("coach_a", "secret");
+        AuthTokens tokens = service.authenticate("coach_a", "secret");
         assertThat(tokens.accessToken()).isNotBlank();
         assertThat(tokens.refreshToken()).isNotBlank();
         assertThat(tokens.expiresInSeconds()).isPositive();
@@ -93,8 +94,8 @@ class AuthServiceTest {
         AuthService service = new AuthService(
                 passwordEncoder, jwtProps, keyProvider.encoder(), refreshRepo, credentialsRepo, userRepo);
 
-        AuthService.AuthTokens issued = service.authenticate("coach_a", "secret");
-        AuthService.AuthTokens tokens = service.refresh(issued.refreshToken());
+        AuthTokens issued = service.authenticate("coach_a", "secret");
+        AuthTokens tokens = service.refresh(issued.refreshToken());
 
         assertThat(tokens.refreshToken()).isNotEqualTo(issued.refreshToken());
         RefreshTokenStore.RefreshTokenRecord revoked =
