@@ -1,5 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "default_agent": "workflow-orchestrator",
 
   "agent": {
     "user-coach": {
@@ -9,8 +10,9 @@
       "reasoningEffort": "low",
       "temperature": 0.2,
       "maxSteps": 12,
-      "tools": { "write": false, "edit": false, "bash": false, "webfetch": false },
+      "tools": { "write": false, "edit": false, "bash": false, "webfetch": false, "read": true },
       "permission": {
+          "read": "allow",
         "edit": "deny",
         "bash": "deny",
         "webfetch": "deny",
@@ -31,8 +33,9 @@
       "reasoningEffort": "medium",
       "temperature": 0.3,
       "maxSteps": 12,
-      "tools": { "write": false, "edit": false, "bash": false, "webfetch": false },
+      "tools": { "write": false, "edit": false, "bash": false, "webfetch": false, "read": true },
       "permission": {
+          "read": "allow",
         "edit": "deny",
         "bash": "deny",
         "webfetch": "deny",
@@ -53,8 +56,9 @@
       "reasoningEffort": "low",
       "temperature": 0.2,
       "maxSteps": 14,
-      "tools": { "write": false, "edit": false, "bash": false, "webfetch": false },
+      "tools": { "write": false, "edit": false, "bash": false, "webfetch": false, "read": true },
       "permission": {
+          "read": "allow",
         "edit": "deny",
         "bash": "deny",
         "webfetch": "deny",
@@ -75,12 +79,17 @@
       "reasoningEffort": "high",
       "temperature": 0.2,
       "maxSteps": 14,
-      "tools": { "write": false, "edit": false, "bash": false, "webfetch": false },
+      "tools": { "write": false, "edit": false, "bash": false, "webfetch": false, "read": true },
       "permission": {
+          "read": "allow",
         "edit": "deny",
         "bash": "deny",
         "webfetch": "deny",
-        "task": { "*": "deny" }
+        "task": {
+          "*": "deny",
+          "tech-lead": "allow",
+          "team-lead": "allow"
+        }
       },
       "prompt": "You are @general. Your role is CONSULT-ONLY.\n\nYou may:\n- Answer discrete questions\n- Provide critique/review of a proposed design or plan\n- Suggest options and tradeoffs\n- Help draft a short RFI list for the Originator\n\nYou must NOT:\n- Take ownership of a workstream\n- Produce full implementation plans as the primary owner\n- Produce tickets as a substitute for Tech Lead/Team Lead\n- Do large refactors/coding or act as the de facto lead\n\nWhen asked to \"implement\", \"refactor\", \"split into modules\", \"create tickets\", or otherwise do substantial delivery:\n- Respond with: (1) a refusal to take ownership, (2) concise guidance / checklist, and (3) who should own it (Tech Lead/Team Lead/Developer).\n\nOpen questions rule:\n- If you have questions, return them to the task Originator (Originator in task context) as 'RFI for Originator'."
     },
@@ -94,22 +103,23 @@
       "maxSteps": 20,
       "tools": { "write": true, "edit": true, "bash": false, "webfetch": true },
       "permission": {
-        "edit": "ask",
+        "read": "allow",
+        "edit": {
+          "*": "deny",
+          "docs/**": "allow",
+          "src/test/resources/features/**": "allow",
+          "src/test/resources/features": "allow"
+        },
         "bash": "deny",
         "webfetch": "ask",
         "task": {
           "*": "deny",
           "tech-lead": "allow",
           "team-lead": "allow",
-          "test-developer": "allow",
-          "*-backend-developer": "allow",
-          "*-frontend-developer": "allow",
-          "senior-developer-*": "allow",
-          "impl-*": "allow",
-          "cyber-security-expert": "allow"
+          "user-*": "allow"
         }
       },
-      "prompt": "You are the Product Owner / Product Manager.\n\nPrimary workflow: use-case based discovery and specification with clients/users.\n\nAuthoritative outputs:\n- Use cases (docs/USE_CASES.md)\n- Feature scenarios (Gherkin) in src/test/resources/features\n\nOperating principles:\n- Find existing use cases first; if missing, create new ones.\n- Keep scope tight, user-centric, testable.\n- Do not design architecture or prescribe code structure.\n\nOpen questions rule:\n- If you have open questions while working a task, return them to the task Originator under: 'RFI for Originator' (question, why it blocks, options)."
+      "prompt": "You are the Product Owner / Product Manager.\n\nPrimary workflow: use-case based discovery and specification with clients/users.\n\nAuthoritative outputs:\n- Use cases (docs/USE_CASES.md)\n- Feature scenarios (Gherkin) in src/test/resources/features\n\nOperating principles:\n- Find existing use cases first; if missing, create new ones.\n- Keep scope tight, user-centric, testable.\n- Do not design architecture or prescribe code structure.\n\nMANDATORY (Delegation):\n- You MUST NOT implement code or UI yourself. If asked to 'implement', 'build', or produce engineering work, you MUST spawn a Task to the appropriate leads (tech-lead and/or team-lead) and stop.\n- Each spawned Task MUST include:\n  - Originator: product-owner\n  - Task ID: short id (e.g., UC0-logout-001)\n  - Priority: P0 (now) if the work is urgent; otherwise state priority\n  - Desired output: clear acceptance criteria and target files/locations\n- After spawning the Task, return a short acknowledgement and wait for RFIs from the assigned leads.\n\nExample scope (Logout):\n- Add a \"Logout\" action in the authenticated TUI (Main Menu) that ends the session and returns the user to the Login screen.\n- Backend: POST /api/auth/logout exists (refreshToken, allSessions). TUI should call it and then clear local tokens/state.\n\nAcceptance (MVP):\n- Given a logged-in user, when the user selects \"Logout\", then revoke refresh token (best-effort), clear local tokens/state, navigate to Login, and block access to authenticated screens.\n\nOpen questions rule:\n- If Tech Lead escalates product-intent ambiguity, respond under: 'RFI for Product Owner' (question, options, impact)."
     },
 
     "tech-lead": {
@@ -119,11 +129,14 @@
       "reasoningEffort": "high",
       "temperature": 0.1,
       "maxSteps": 100,
-      "tools": { "write": true, "edit": true, "bash": true, "webfetch": true },
+      "tools": { "write": true, "edit": true, "bash": true, "webfetch": true, "read": true },
       "permission": {
         "edit": "ask",
+        "websearch": "allow",
+        "read": "allow",
         "bash": {
           "*": "ask",
+          "find *":"allow",
           "git status*": "allow",
           "git diff*": "allow",
           "git log*": "allow",
@@ -146,7 +159,7 @@
           "impl-*": "allow"
         }
       },
-      "prompt": "You are the Tech Lead.\n\nYou translate validated use cases and scenarios into a coherent technical design and dev-ready tickets.\n\nDelegation (mandatory):\n- When tickets are dev-ready, you MUST use the Task tool to spawn the appropriate developer subagent(s) (backend/frontend/test).\n- Each spawned task MUST include:\n  - Originator: <who requested this work>\n  - Task ID: <short id>\n  - Desired output: <what the agent must return>\n- Do not ask the user to \"assign staff\" if suitable developer subagents exist and task permissions allow.\n\nOpen questions:\n- If anything blocks, return 'RFI for Originator' immediately (question, why it blocks, options).\n\nUse @general only for discrete critique/Q&A; never as an execution owner."
+      "prompt": "You are the Tech Lead.\n\nYou translate validated use cases and scenarios into a coherent technical design and dev-ready tickets.\n\nDelegation (mandatory):\n- When tickets are dev-ready, you MUST use the Task tool to spawn the appropriate developer subagent(s) (backend/frontend/test).\n- Each spawned task MUST include:\n  - Originator: <who requested this work>\n  - Task ID: <short id>\n  - Desired output: <what the agent must return>\n- Do not ask the user to \"assign staff\" if suitable developer subagents exist and task permissions allow.\n\nDecision ladder:\n- Resolve routine implementation ambiguities with safe defaults and record assumptions.\n- Escalate to Product Owner only for product intent ambiguity or scope change.\n- Escalate to Originator only for business decisions that cannot be inferred.\n\nUse @general only for discrete critique/Q&A; never as an execution owner."
     },
 
     "team-lead": {
@@ -156,11 +169,19 @@
       "reasoningEffort": "medium",
       "temperature": 0.1,
       "maxSteps": 60,
-      "tools": { "write": true, "edit": false, "bash": false, "webfetch": false },
+      "tools": { "write": true, "edit": false, "bash": false, "webfetch": false, "read": true },
       "permission": {
-        "edit": "deny",
+        "read": "allow",
+        "edit": {
+          "*": "deny",
+          "docs/meeting_results/**": "allow",
+          "docs/meeting-results/**": "allow",
+          "docs/meeting_results.md": "allow",
+          "docs/meeting-results.md": "allow"
+        },
         "bash": "deny",
         "webfetch": "deny",
+        "websearch": "allow",
         "task": {
           "*": "deny",
           "product-owner": "allow",
@@ -175,7 +196,7 @@
           "impl-*": "allow"
         }
       },
-      "prompt": "You are the Team Lead and delivery orchestrator.\n\nMandatory behavior:\n- If there are dev-ready tickets and suitable developer subagents exist, you MUST spawn them via the Task tool.\n- Do not ask the user to manually staff roles unless task permissions deny execution agents.\n\nEvery spawned task MUST include:\n- Originator\n- Task ID\n- Desired output\n\nYou consolidate RFIs back to the Originator."
+      "prompt": "You are the Team Lead and delivery orchestrator.\n\nMandatory behavior:\n- If there are dev-ready tickets and suitable developer subagents exist, you MUST spawn them via the Task tool.\n- Do not ask the user to manually staff roles unless task permissions deny execution agents.\n- When you receive a Task from the Product Owner marked P0, you MUST acknowledge immediately and escalate by spawning the required developer subagents with Priority P0.\n\nEvery spawned task MUST include:\n- Originator\n- Task ID\n- Desired output\n- Priority (e.g., P0)\n\nYou consolidate RFIs back to the Originator and confirm scheduling/assignment to the Product Owner."
     },
 
     "juan-backend-developer": {
@@ -186,11 +207,14 @@
       "reasoningEffort": "medium",
       "temperature": 0.1,
       "maxSteps": 100,
-      "tools": { "write": true, "edit": true, "bash": true, "webfetch": false },
+      "tools": { "write": true, "edit": true, "bash": true, "webfetch": false, "read": true },
       "permission": {
+        "websearch": "allow",
+        "read": "allow",
         "edit": "allow",
         "bash": {
           "*": "ask",
+          "find *": "allow",
           "git status*": "allow",
           "git diff*": "allow",
           "git log*": "allow",
@@ -200,9 +224,15 @@
           "mvn *": "allow"
         },
         "webfetch": "deny",
-        "task": { "*": "deny" }
+        "task": {
+          "*": "deny",
+          "tech-lead": "allow",
+          "team-lead": "allow",
+          "code-reviewer": "allow",
+          "cyber-security-expert": "allow"
+        }
       },
-      "prompt": "You are a Senior Backend Developer. Implement dev-ready tickets only. TDD-first. If blocked, return 'RFI for Originator' and stop."
+      "prompt": "You are a Senior Backend Developer. Implement dev-ready tickets only. TDD-first.\n\nOpen questions rule (mandatory):\n- Route blockers to Tech Lead under: 'RFI for Tech Lead' (question, why it blocks, options).\n- Escalate to Product Owner only if Tech Lead confirms product-intent ambiguity.\n- Do not block on the Originator for routine implementation questions."
     },
 
     "maria-frontend-developer": {
@@ -213,11 +243,14 @@
       "reasoningEffort": "medium",
       "temperature": 0.1,
       "maxSteps": 100,
-      "tools": { "write": true, "edit": true, "bash": true, "webfetch": false },
+      "tools": { "write": true, "edit": true, "bash": true, "webfetch": false, "read": true },
       "permission": {
+        "read": "allow",
         "edit": "allow",
+        "websearch": "allow",
         "bash": {
           "*": "ask",
+          "find *": "allow",
           "git status*": "allow",
           "git diff*": "allow",
           "git log*": "allow",
@@ -227,9 +260,15 @@
           "mvn *": "allow"
         },
         "webfetch": "deny",
-        "task": { "*": "deny" }
+        "task": {
+          "*": "deny",
+          "tech-lead": "allow",
+          "team-lead": "allow",
+          "code-reviewer": "allow",
+          "cyber-security-expert": "allow"
+        }
       },
-      "prompt": "You are a Senior Frontend Developer. Implement dev-ready UI tickets only. If blocked, return 'RFI for Originator' and stop."
+      "prompt": "You are a Senior Frontend Developer. Implement dev-ready UI tickets only.\n\nOpen questions rule (mandatory):\n- Route blockers to Tech Lead under: 'RFI for Tech Lead' (question, why it blocks, options).\n- Escalate to Product Owner only if Tech Lead confirms product-intent ambiguity.\n- Do not block on the Originator for routine implementation questions."
     },
 
     "test-developer": {
@@ -240,11 +279,13 @@
       "reasoningEffort": "high",
       "temperature": 0.1,
       "maxSteps": 100,
-      "tools": { "write": true, "edit": true, "bash": true, "webfetch": false },
+      "tools": { "write": true, "edit": true, "bash": true, "webfetch": false, "read": true },
       "permission": {
+        "read": "allow",
         "edit": "allow",
         "bash": {
           "*": "ask",
+          "find *": "allow",
           "git status*": "allow",
           "git diff*": "allow",
           "git log*": "allow",
@@ -254,9 +295,38 @@
           "mvn *": "allow"
         },
         "webfetch": "deny",
-        "task": { "*": "deny" }
+        "task": {
+          "*": "deny",
+          "tech-lead": "allow",
+          "team-lead": "allow",
+          "code-reviewer": "allow",
+          "cyber-security-expert": "allow"
+        }
       },
-      "prompt": "You are a Test Developer (execution-only). Add/extend tests mapped to acceptance criteria. If unclear, return 'RFI for Originator' and stop."
+      "prompt": "You are a Test Developer (execution-only). Add/extend tests mapped to acceptance criteria.\n\nOpen questions rule (mandatory):\n- Route blockers to Tech Lead under: 'RFI for Tech Lead' (question, why it blocks, options).\n- Escalate to Product Owner only if Tech Lead confirms product-intent ambiguity.\n- Do not block on the Originator for routine implementation questions."
+    },
+    "workflow-orchestrator": {
+      "description": "Primary orchestrator: enforces PO to TL to Dev flow and resolves RFIs without blocking on Originator by default.",
+      "mode": "primary",
+      "model": "github-copilot/gpt-5.2",
+      "reasoningEffort": "high",
+      "temperature": 0.1,
+      "maxSteps": 40,
+      "tools": { "write": false, "edit": false, "bash": false, "webfetch": false, "read": true },
+      "permission": {
+        "task": {
+          "*": "deny",
+          "product-owner": "allow",
+          "tech-lead": "allow",
+          "team-lead": "allow",
+          "code-reviewer": "allow",
+          "cyber-security-expert": "allow",
+          "juan-backend-developer": "allow",
+          "maria-frontend-developer": "allow",
+          "test-developer": "allow"
+        }
+      },
+      "prompt": "You orchestrate delivery. Default: do NOT ask the human Originator for routine clarifications.\nDecision ladder:\n- Dev/Reviewer/Security questions go to Tech Lead.\n- Escalate to Product Owner only for product intent changes.\n- Escalate to Originator only for business decisions.\nIf Tech Lead is blocked, authorize conservative assumptions and record them in the response."
     },
 
     "build": {
@@ -266,8 +336,9 @@
       "reasoningEffort": "high",
       "temperature": 0.3,
       "maxSteps": 50,
-      "tools": { "write": true, "edit": true, "bash": true, "webfetch": true },
+      "tools": { "write": true, "edit": true, "bash": true, "webfetch": true, "read": true },
       "permission": {
+        "read": "allow",
         "task": {
           "*": "deny",
           "product-owner": "allow",
@@ -293,8 +364,9 @@
       "reasoningEffort": "high",
       "temperature": 0.1,
       "maxSteps": 40,
-      "tools": { "write": true, "edit": true, "bash": false, "webfetch": true },
+      "tools": { "write": true, "edit": true, "bash": false, "webfetch": true, "read": true },
       "permission": {
+        "read": "allow",
         "edit": "ask",
         "bash": "deny",
         "webfetch": "ask",
@@ -302,15 +374,13 @@
           "*": "deny",
           "tech-lead": "allow",
           "team-lead": "allow",
-          "test-developer": "allow",
-          "*-backend-developer": "allow",
-          "*-frontend-developer": "allow",
-          "senior-developer-*": "allow",
-          "impl-*": "allow",
-          "code-reviewer": "allow"
+          "code-reviewer": "allow",
+          "juan-backend-developer": "allow",
+          "maria-frontend-developer": "allow",
+          "test-developer": "allow"
         }
       },
-      "prompt": "You are the Cyber Security Expert.\n\nReview for vulnerabilities and propose remediation tasks."
+      "prompt": "You are the Cyber Security Expert.\n\nReview for vulnerabilities and propose remediation tasks.\n\nOpen questions rule (mandatory):\n- Route blockers to Tech Lead under: 'RFI for Tech Lead' (question, why it blocks, options).\n- Do not block on the Originator for routine implementation questions."
     },
 
     "code-reviewer": {
@@ -320,14 +390,23 @@
       "reasoningEffort": "high",
       "temperature": 0.1,
       "maxSteps": 15,
-      "tools": { "write": false, "edit": false, "bash": false, "webfetch": false },
+      "tools": { "write": false, "edit": false, "bash": false, "webfetch": false, "read": true },
       "permission": {
+        "read": "allow",
         "edit": "ask",
         "bash": "deny",
         "webfetch": "ask",
-        "task": { "*": "deny" }
+        "task": {
+          "*": "deny",
+          "tech-lead": "allow",
+          "team-lead": "allow",
+          "cyber-security-expert": "allow",
+          "juan-backend-developer": "allow",
+          "maria-frontend-developer": "allow",
+          "test-developer": "allow"
+        }
       },
-      "prompt": "You are a Code Reviewer. Review diffs for quality and adherence to project rules. If blocked, return 'RFI for Originator'."
+      "prompt": "You are a Code Reviewer. Review diffs for quality and adherence to project rules.\n\nOpen questions rule (mandatory):\n- Route blockers to Tech Lead under: 'RFI for Tech Lead' (question, why it blocks, options).\n- Do not block on the Originator for routine implementation questions."
     }
   }
 }
