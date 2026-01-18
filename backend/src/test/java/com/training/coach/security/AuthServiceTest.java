@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 import com.training.coach.common.AuthTokens;
+import com.training.coach.security.AuthUnauthorizedException;
 import com.training.coach.user.application.port.out.SystemUserRepository;
 import com.training.coach.user.domain.model.SystemUser;
 import com.training.coach.user.domain.model.UserPreferences;
@@ -69,7 +70,8 @@ class AuthServiceTest {
         AuthService service = new AuthService(
                 passwordEncoder, jwtProps, keyProvider.encoder(), refreshRepo, credentialsRepo, userRepo);
 
-        assertThatThrownBy(() -> service.authenticate("coach_a", "wrong")).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> service.authenticate("coach_a", "wrong"))
+                .isInstanceOf(AuthUnauthorizedException.class);
     }
 
     @Test

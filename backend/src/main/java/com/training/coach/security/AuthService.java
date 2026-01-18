@@ -47,16 +47,16 @@ public class AuthService {
     public AuthTokens authenticate(String username, String password) {
         var credentials = credentialsRepository
                 .findByUsername(username)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
+                .orElseThrow(() -> new AuthUnauthorizedException("Invalid credentials"));
         if (!credentials.isEnabled()) {
-            throw new IllegalArgumentException("User is disabled");
+            throw new AuthUnauthorizedException("Invalid credentials");
         }
         if (!passwordEncoder.matches(password, credentials.getPasswordHash())) {
-            throw new IllegalArgumentException("Invalid credentials");
+            throw new AuthUnauthorizedException("Invalid credentials");
         }
         var user = userRepository
                 .findById(credentials.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new AuthUnauthorizedException("Invalid credentials"));
         String accessToken = issueAccessToken(user);
         IssuedRefreshToken refreshToken =
                 issueRefreshToken(user.id(), UUID.randomUUID().toString());
