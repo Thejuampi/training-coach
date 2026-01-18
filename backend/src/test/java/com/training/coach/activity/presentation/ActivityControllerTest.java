@@ -1,7 +1,6 @@
 package com.training.coach.activity.presentation;
 
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.mockUser;
 
 import com.training.coach.activity.application.service.ActivityReadService;
 import com.training.coach.activity.domain.model.ActivityLight;
@@ -15,13 +14,14 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 @SpringBootTest(properties = "intervals.icu.api-key=test")
