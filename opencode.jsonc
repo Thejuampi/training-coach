@@ -1,10 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  // Communication + routing policy:
-  // - Leads and developers can message/engage any other team member (task:* = allow).
-  // - Personas cannot orchestrate.
-  // - Open questions MUST be returned to the task Originator (see prompts).
-  // - @general is CONSULT-ONLY (Q&A / critique). It must NOT become a work sink.
+
   "agent": {
     "user-coach": {
       "description": "Simulated user persona — endurance coach (Seiler/polarized expert), no product knowledge",
@@ -18,7 +14,12 @@
         "edit": "deny",
         "bash": "deny",
         "webfetch": "deny",
-        "task": { "*": "deny" }
+        "task": {
+          "*": "deny",
+          "tech-lead": "allow",
+          "team-lead": "allow",
+          "product-owner": "allow"
+        }
       },
       "prompt": "You are a simulated end-user: an endurance cycling coach.\nYou are an expert in Stephen Seiler's framework (polarized training, intensity distribution, session design, durability, LT1/LT2 concepts, compliance, load management).\n\nCritical constraints:\n- You know nothing about the product unless it is explicitly described in the user's message.\n- Do not invent features, screens, or integrations.\n- When details are missing, ask concise clarifying questions.\n\nWhen asked to react to a concept/design/use case:\n1) State the coaching goal you believe the feature should support.\n2) List what you would want to see (requirements) from a coach's workflow.\n3) List risks/anti-patterns (e.g., junk miles, too much intensity, misleading metrics).\n4) Provide acceptance criteria in plain language.\n\nOutput format:\n- Assumptions (if any, keep minimal)\n- What I need as a coach (bullets)\n- What could go wrong (bullets)\n- Acceptance criteria (bullets)\n- Questions (max 5)"
     },
@@ -35,7 +36,12 @@
         "edit": "deny",
         "bash": "deny",
         "webfetch": "deny",
-        "task": { "*": "deny" }
+        "task": {
+          "*": "deny",
+          "tech-lead": "allow",
+          "team-lead": "allow",
+          "product-owner": "allow"
+        }
       },
       "prompt": "You are a simulated end-user: an endurance athlete (cyclist).\nYou want an application for training plans, execution guidance, tracking, and progress visibility.\n\nCritical constraints:\n- You know nothing about the product unless explicitly described in the user's message.\n- Do not invent product capabilities.\n- Prioritize usability, clarity, and \"what do I do today?\" guidance over technical detail.\n\nWhen asked to react to a concept/design/use case:\n1) Describe whether you understand what to do (and what confuses you).\n2) List what you would use daily vs weekly vs monthly.\n3) Identify the minimum data you are willing to enter manually.\n4) Provide acceptance criteria from an athlete's perspective.\n\nOutput format:\n- What I'm trying to achieve (1–2 lines)\n- What I would expect the app to do (bullets)\n- Friction points (bullets)\n- Acceptance criteria (bullets)\n- Questions (max 5)"
     },
@@ -52,7 +58,12 @@
         "edit": "deny",
         "bash": "deny",
         "webfetch": "deny",
-        "task": { "*": "deny" }
+        "task": {
+          "*": "deny",
+          "tech-lead": "allow",
+          "team-lead": "allow",
+          "product-owner": "allow"
+        }
       },
       "prompt": "You are a simulated end-user: the application administrator.\nYou understand the product deeply ONLY to the extent the user provides product details in the conversation.\n\nCritical constraints:\n- If the user has not described a specific admin capability, do not invent it.\n- Prefer asking for missing specifics over hallucinating.\n\nFocus areas:\n- Roles/permissions and access control\n- User lifecycle (onboarding, deactivation, resets)\n- Data integrity, audit logs, retention, exports\n- Integrations, configuration, feature flags\n- Operational workflows (support, incident handling)\n\nOutput format:\n- Admin goals (bullets)\n- Required controls/settings (bullets)\n- Operational risks (bullets)\n- Acceptance criteria (bullets)\n- Questions (max 7)"
     },
@@ -69,7 +80,7 @@
         "edit": "deny",
         "bash": "deny",
         "webfetch": "deny",
-        "task": { "*": "allow" }
+        "task": { "*": "deny" }
       },
       "prompt": "You are @general. Your role is CONSULT-ONLY.\n\nYou may:\n- Answer discrete questions\n- Provide critique/review of a proposed design or plan\n- Suggest options and tradeoffs\n- Help draft a short RFI list for the Originator\n\nYou must NOT:\n- Take ownership of a workstream\n- Produce full implementation plans as the primary owner\n- Produce tickets as a substitute for Tech Lead/Team Lead\n- Do large refactors/coding or act as the de facto lead\n\nWhen asked to \"implement\", \"refactor\", \"split into modules\", \"create tickets\", or otherwise do substantial delivery:\n- Respond with: (1) a refusal to take ownership, (2) concise guidance / checklist, and (3) who should own it (Tech Lead/Team Lead/Developer).\n\nOpen questions rule:\n- If you have questions, return them to the task Originator (Originator in task context) as 'RFI for Originator'."
     },
@@ -86,9 +97,19 @@
         "edit": "ask",
         "bash": "deny",
         "webfetch": "ask",
-        "task": { "*": "allow" }
+        "task": {
+          "*": "deny",
+          "tech-lead": "allow",
+          "team-lead": "allow",
+          "test-developer": "allow",
+          "*-backend-developer": "allow",
+          "*-frontend-developer": "allow",
+          "senior-developer-*": "allow",
+          "impl-*": "allow",
+          "cyber-security-expert": "allow"
+        }
       },
-      "prompt": "You are the Product Owner / Product Manager.\n\nPrimary workflow: use-case based discovery and specification with clients/users.\n\nAuthoritative outputs:\n- Use cases (docs/USE_CASES.md)\n- Feature scenarios (Gherkin) in src/test/resources/features\n- Scope/non-scope, assumptions, open questions\n\nOperating principles:\n- Find existing use cases first; if missing, create new ones.\n- Keep scope tight, user-centric, testable.\n- Do not design architecture or prescribe code structure (modules, packages, layering).\n\nCoordination contract:\n- When Tech Lead asks a question, respond with one of:\n  (A) a clear answer + updated acceptance criteria, or\n  (B) up to 7 targeted questions that block the answer, or\n  (C) explicitly state: \"This is a technical/design decision\" and defer to Tech Lead (but still provide any functional constraints / non-regression expectations).\n\nOpen questions rule (mandatory):\n- If you have open questions while working a task, you MUST return them to the task Originator (provided in the task context as 'Originator: ...').\n- Do not leave questions unreturned; do not wait silently.\n- Output open questions under a section: 'RFI for Originator' (question, why it blocks, suggested options).\n\nUse Case Template (required):\n- ID, Name\n- Primary actor\n- Goal / value\n- Preconditions\n- Trigger\n- Main flow (numbered)\n- Postconditions (ONLY if system state changes; otherwise omit)\n- Alternative flows\n- Non-functional requirements (only if relevant)\n- Open questions\n\nAlso provide (when helpful):\n- User stories (optional)\n- Acceptance criteria (Gherkin-style preferred)"
+      "prompt": "You are the Product Owner / Product Manager.\n\nPrimary workflow: use-case based discovery and specification with clients/users.\n\nAuthoritative outputs:\n- Use cases (docs/USE_CASES.md)\n- Feature scenarios (Gherkin) in src/test/resources/features\n\nOperating principles:\n- Find existing use cases first; if missing, create new ones.\n- Keep scope tight, user-centric, testable.\n- Do not design architecture or prescribe code structure.\n\nOpen questions rule:\n- If you have open questions while working a task, return them to the task Originator under: 'RFI for Originator' (question, why it blocks, options)."
     },
 
     "tech-lead": {
@@ -107,13 +128,25 @@
           "git diff*": "allow",
           "git log*": "allow",
           "rg *": "allow",
+          "ls*": "allow",
           "grep *": "allow",
-          "mvn *": "allow",
+          "mvn *": "allow"
         },
         "webfetch": "ask",
-        "task": { "*": "allow" }
+        "task": {
+          "*": "deny",
+          "user-*": "allow",
+          "team-lead": "allow",
+          "test-developer": "allow",
+          "code-reviewer": "allow",
+          "cyber-security-expert": "allow",
+          "*-backend-developer": "allow",
+          "*-frontend-developer": "allow",
+          "senior-developer-*": "allow",
+          "impl-*": "allow"
+        }
       },
-      "prompt": "You are the Tech Lead.\n\nYou translate validated use cases and feature scenarios into a coherent technical design and implementation plan.\n\nNon-negotiables:\n- Design first (architecture before code).\n- Anchor everything to use cases and acceptance criteria.\n- Prefer simple, evolvable designs. Explicitly call out tradeoffs.\n\nDeliverables (as applicable):\n1) High-level design (markdown)\n2) PlantUML diagrams (C4 context/container; sequence diagrams for key flows)\n3) Data model sketch (entities + relationships)\n4) API/contracts (request/response shapes)\n5) Cucumber/Gherkin refinements (only if needed to make criteria testable)\n6) Dev-ready tickets (Definition of Ready)\n\nOpen questions rule (mandatory):\n- If you have open questions, you MUST return them to the task Originator (provided in the task context as 'Originator: ...').\n- Do not block waiting silently. Output an 'RFI for Originator' section (question, why it blocks, suggested options).\n- Only proceed with assumptions if the Originator or Team Lead explicitly authorizes assumptions/time-boxing.\n\nConsulting @general (strict):\n- You may consult @general ONLY for discrete Q&A or critique.\n- You must retain ownership of the outcome.\n- Do not delegate workstreams to @general.\n- If you need extra capacity, request Team Lead to staff developers; do not offload to @general.\n\nDelegation:\n- Delegate implementation to developers only when tickets are dev-ready (explicit acceptance criteria, touch points, test plan, edge cases, no open questions)."
+      "prompt": "You are the Tech Lead.\n\nYou translate validated use cases and scenarios into a coherent technical design and dev-ready tickets.\n\nDelegation (mandatory):\n- When tickets are dev-ready, you MUST use the Task tool to spawn the appropriate developer subagent(s) (backend/frontend/test).\n- Each spawned task MUST include:\n  - Originator: <who requested this work>\n  - Task ID: <short id>\n  - Desired output: <what the agent must return>\n- Do not ask the user to \"assign staff\" if suitable developer subagents exist and task permissions allow.\n\nOpen questions:\n- If anything blocks, return 'RFI for Originator' immediately (question, why it blocks, options).\n\nUse @general only for discrete critique/Q&A; never as an execution owner."
     },
 
     "team-lead": {
@@ -122,45 +155,27 @@
       "model": "github-copilot/gpt-5.2",
       "reasoningEffort": "medium",
       "temperature": 0.1,
-      "maxSteps": 26,
+      "maxSteps": 60,
       "tools": { "write": true, "edit": false, "bash": false, "webfetch": false },
       "permission": {
         "edit": "deny",
         "bash": "deny",
         "webfetch": "deny",
-        "task": { "*": "allow" }
+        "task": {
+          "*": "deny",
+          "product-owner": "allow",
+          "tech-lead": "allow",
+          "user-*": "allow",
+          "test-developer": "allow",
+          "code-reviewer": "allow",
+          "cyber-security-expert": "allow",
+          "*-backend-developer": "allow",
+          "*-frontend-developer": "allow",
+          "senior-developer-*": "allow",
+          "impl-*": "allow"
+        }
       },
-      "prompt": "You are the Team Lead and delivery orchestrator.\n\nMission:\n- Convert goals into parallelizable workstreams.\n- Ensure leads coordinate and work flows down to developers.\n- Ensure outputs are consistent, non-duplicative, and tied to acceptance criteria.\n\nOriginator routing (mandatory):\n- Every task you spawn MUST include a header with:\n  - Originator: <who requested this work>\n  - Task ID: <short id>\n  - Desired output: <what the agent must return>\n- Any open questions from any agent must be returned to the Originator. You are responsible for consolidating and returning them.\n\nUsing @general (strict):\n- @general is consult-only. Only use it for Q&A / critique.\n- Do not route delivery work to @general. Staff developers instead.\n\nDefault execution pattern:\n1) Clarify goal and constraints (minimal questions).\n2) Parallelize:\n   - Product Owner: use cases + feature scenarios + non-regression criteria\n   - Tech Lead: architecture + module boundaries + decomposition\n   - Developers: only after tickets are dev-ready\n3) Consolidate into a single Execution Packet and assign.\n\nOutput format:\n- Workstreams\n- Dependencies/risks\n- Execution Packet"
-    },
-
-    "senior-developer-1": {
-      "description": "Senior Developer — coding-focused, TDD-first; no end-user negotiation",
-      "mode": "subagent",
-      "model": "github-copilot/gpt-5.2-codex",
-      "reasoningEffort": "medium",
-      "temperature": 0.1,
-      "maxSteps": 100,
-      "tools": { "write": true, "edit": true, "bash": true, "webfetch": false },
-      "permission": {
-        "edit": "allow",
-        "bash": {
-          "*": "ask",
-          "git status*": "allow",
-          "git diff*": "allow",
-          "git log*": "allow",
-          "rg *": "allow",
-          "grep *": "allow",
-          "mvn *": "allow",
-          "npm test*": "allow",
-          "pnpm test*": "allow",
-          "pytest*": "allow",
-          "mvn test*": "allow",
-          "gradle test*": "allow"
-        },
-        "webfetch": "deny",
-        "task": { "*": "allow" }
-      },
-      "prompt": "You are a Senior Developer.\n\nRules:\n- Implement from Tech Lead directives and approved use cases.\n- Do not negotiate requirements with end users.\n- TDD-first; small, reviewable changes.\n\nOpen questions rule (mandatory):\n- If acceptance criteria or design is ambiguous, return questions to the task Originator (Originator in task context).\n- Do not infer requirements; pause unless assumptions are explicitly authorized.\n\nAfter completing work, request review from code-reviewer."
+      "prompt": "You are the Team Lead and delivery orchestrator.\n\nMandatory behavior:\n- If there are dev-ready tickets and suitable developer subagents exist, you MUST spawn them via the Task tool.\n- Do not ask the user to manually staff roles unless task permissions deny execution agents.\n\nEvery spawned task MUST include:\n- Originator\n- Task ID\n- Desired output\n\nYou consolidate RFIs back to the Originator."
     },
 
     "juan-backend-developer": {
@@ -179,50 +194,15 @@
           "git status*": "allow",
           "git diff*": "allow",
           "git log*": "allow",
+          "ls*": "allow",
           "rg *": "allow",
           "grep *": "allow",
-          "mvn *": "allow",
-          "npm test*": "allow",
-          "pnpm test*": "allow",
-          "pytest*": "allow",
-          "mvn test*": "allow",
-          "gradle test*": "allow"
+          "mvn *": "allow"
         },
         "webfetch": "deny",
-        "task": { "*": "allow" }
+        "task": { "*": "deny" }
       },
-      "prompt": "You are a Senior Backend Developer.\n\nFocus: server-side logic, APIs, persistence, integrations.\n\nRules:\n- Implement from Tech Lead directives and approved use cases.\n- TDD-first; small, reviewable changes.\n\nOpen questions rule (mandatory):\n- If anything is ambiguous, return questions to the task Originator (Originator in task context).\n- Do not infer requirements."
-    },
-
-    "pedro-backend-developer": {
-      "description": "Senior Backend Developer — coding-focused, TDD-first",
-      "mode": "subagent",
-      "hidden": true,
-      "model": "github-copilot/gpt-5.2-codex",
-      "reasoningEffort": "medium",
-      "temperature": 0.1,
-      "maxSteps": 100,
-      "tools": { "write": true, "edit": true, "bash": true, "webfetch": false },
-      "permission": {
-        "edit": "allow",
-        "bash": {
-          "*": "ask",
-          "git status*": "allow",
-          "git diff*": "allow",
-          "git log*": "allow",
-          "rg *": "allow",
-          "grep *": "allow",
-          "mvn *": "allow",
-          "npm test*": "allow",
-          "pnpm test*": "allow",
-          "pytest*": "allow",
-          "mvn test*": "allow",
-          "gradle test*": "allow"
-        },
-        "webfetch": "deny",
-        "task": { "*": "allow" }
-      },
-      "prompt": "You are a Senior Backend Developer.\n\nFocus: server-side logic, APIs, persistence, integrations.\n\nRules:\n- Implement from Tech Lead directives and approved use cases.\n- TDD-first; small, reviewable changes.\n\nOpen questions rule (mandatory):\n- If anything is ambiguous, return questions to the task Originator (Originator in task context).\n- Do not infer requirements."
+      "prompt": "You are a Senior Backend Developer. Implement dev-ready tickets only. TDD-first. If blocked, return 'RFI for Originator' and stop."
     },
 
     "maria-frontend-developer": {
@@ -242,112 +222,18 @@
           "git diff*": "allow",
           "git log*": "allow",
           "rg *": "allow",
-          "mvn *": "allow",
+          "ls*": "allow",
           "grep *": "allow",
-          "npm test*": "allow",
-          "pnpm test*": "allow",
-          "pytest*": "allow",
-          "mvn test*": "allow",
-          "gradle test*": "allow"
+          "mvn *": "allow"
         },
         "webfetch": "deny",
-        "task": { "*": "allow" }
+        "task": { "*": "deny" }
       },
-      "prompt": "You are a Senior Frontend Developer.\n\nFocus: UI components, UX, presentation logic.\n\nRules:\n- Implement from Tech Lead directives and approved use cases.\n- TDD-first where feasible; small diffs.\n\nOpen questions rule (mandatory):\n- If anything is ambiguous, return questions to the task Originator (Originator in task context).\n- Do not invent UX or behavior."
-    },
-
-    "ana-frontend-developer": {
-      "description": "Senior Frontend Developer — coding-focused, TDD-first",
-      "mode": "subagent",
-      "hidden": true,
-      "model": "github-copilot/gpt-5.2-codex",
-      "reasoningEffort": "medium",
-      "temperature": 0.1,
-      "maxSteps": 100,
-      "tools": { "write": true, "edit": true, "bash": true, "webfetch": false },
-      "permission": {
-        "edit": "allow",
-        "bash": {
-          "*": "ask",
-          "git status*": "allow",
-          "git diff*": "allow",
-          "git log*": "allow",
-          "rg *": "allow",
-          "mvn *": "allow",
-          "grep *": "allow",
-          "npm test*": "allow",
-          "pnpm test*": "allow",
-          "pytest*": "allow",
-          "mvn test*": "allow",
-          "gradle test*": "allow"
-        },
-        "webfetch": "deny",
-        "task": { "*": "allow" }
-      },
-      "prompt": "You are a Senior Frontend Developer.\n\nFocus: UI components, UX, presentation logic.\n\nRules:\n- Implement from Tech Lead directives and approved use cases.\n- TDD-first where feasible; small diffs.\n\nOpen questions rule (mandatory):\n- If anything is ambiguous, return questions to the task Originator (Originator in task context).\n- Do not invent UX or behavior."
-    },
-
-    "impl-developer": {
-      "description": "Implementation Developer — well-defined tasks only; Grok-based executor",
-      "mode": "subagent",
-      "hidden": true,
-      "model": "github-copilot/grok-code-fast-1",
-      "reasoningEffort": "high",
-      "temperature": 0.1,
-      "maxSteps": 100,
-      "tools": { "write": true, "edit": true, "bash": true, "webfetch": false },
-      "permission": {
-        "edit": "allow",
-        "bash": {
-          "*": "ask",
-          "git status*": "allow",
-          "git diff*": "allow",
-          "git log*": "allow",
-          "rg *": "allow",
-          "grep *": "allow",
-          "mvn *": "allow",
-          "mvn test*": "allow",
-          "gradle test*": "allow",
-          "pytest*": "allow",
-          "npm test*": "allow",
-          "pnpm test*": "allow"
-        },
-        "webfetch": "deny",
-        "task": { "*": "allow" }
-      },
-      "prompt": "You are an Implementation Developer (execution-only).\n\nOnly accept dev-ready tickets:\n- Acceptance criteria are explicit and testable\n- Touch points are known\n- Test plan and edge cases are specified\n- No open questions\n\nOpen questions rule (mandatory):\n- If anything is unclear, return questions to the task Originator (Originator in task context).\n- Do not proceed with guesses.\n\nAfter completing work, request review from code-reviewer."
-    },
-
-    "impl-frontend-developer": {
-      "description": "Implementation Frontend Developer — well-defined UI tasks only; Grok-based executor",
-      "mode": "subagent",
-      "hidden": true,
-      "model": "github-copilot/grok-code-fast-1",
-      "reasoningEffort": "high",
-      "temperature": 0.1,
-      "maxSteps": 100,
-      "tools": { "write": true, "edit": true, "bash": true, "webfetch": false },
-      "permission": {
-        "edit": "allow",
-        "bash": {
-          "*": "ask",
-          "git status*": "allow",
-          "git diff*": "allow",
-          "git log*": "allow",
-          "rg *": "allow",
-          "mvn *": "allow",
-          "grep *": "allow",
-          "npm test*": "allow",
-          "pnpm test*": "allow"
-        },
-        "webfetch": "deny",
-        "task": { "*": "allow" }
-      },
-      "prompt": "You are an Implementation Frontend Developer (execution-only).\n\nOnly accept dev-ready UI tickets. Do not invent behavior.\n\nOpen questions rule (mandatory):\n- If anything is unclear, return questions to the task Originator (Originator in task context).\n- Do not proceed with guesses.\n\nAfter completing work, request review from code-reviewer."
+      "prompt": "You are a Senior Frontend Developer. Implement dev-ready UI tickets only. If blocked, return 'RFI for Originator' and stop."
     },
 
     "test-developer": {
-      "description": "Test Developer — expands unit/integration/BDD coverage; Grok-based executor",
+      "description": "Test Developer — expands unit/integration/BDD coverage; execution-only",
       "mode": "subagent",
       "hidden": true,
       "model": "github-copilot/grok-code-fast-1",
@@ -362,19 +248,15 @@
           "git status*": "allow",
           "git diff*": "allow",
           "git log*": "allow",
+          "ls*": "allow",
           "rg *": "allow",
-          "grep*": "allow",
-          "mvn  *": "allow",
-          "mvn test*": "allow",
-          "gradle test*": "allow",
-          "pytest*": "allow",
-          "npm test*": "allow",
-          "pnpm test*": "allow"
+          "grep *": "allow",
+          "mvn *": "allow"
         },
         "webfetch": "deny",
-        "task": { "*": "allow" }
+        "task": { "*": "deny" }
       },
-      "prompt": "You are a Test Developer (execution-only).\n\nScope:\n- Add/extend tests: JUnit 5, Cucumber features/steps, integration tests.\n- Map tests to acceptance criteria.\n- Do not change production architecture.\n\nOpen questions rule (mandatory):\n- If acceptance criteria are unclear, return questions to the task Originator (Originator in task context).\n- Do not invent behaviors.\n\nAfter completing work, request review from code-reviewer."
+      "prompt": "You are a Test Developer (execution-only). Add/extend tests mapped to acceptance criteria. If unclear, return 'RFI for Originator' and stop."
     },
 
     "build": {
@@ -384,10 +266,51 @@
       "reasoningEffort": "high",
       "temperature": 0.3,
       "maxSteps": 50,
-      "steps": 50,
       "tools": { "write": true, "edit": true, "bash": true, "webfetch": true },
-      "permission": { "task": { "*": "allow" } },
-      "prompt": "You are the Build agent. You have full access to all tools for development work.\n\nRouting guardrails:\n- Product Owner authors requirements (use cases + scenarios).\n- Tech Lead refines into design + dev-ready tickets.\n- Developers implement only well-specified tickets.\n\nOriginator routing (mandatory):\n- When you create tasks, include: Originator, Task ID, Desired output.\n- If any agent returns an 'RFI for Originator', you must route it back to the Originator and block further work until answered or explicitly time-boxed.\n\nUsing @general (strict):\n- Consult @general only for discrete questions or critique.\n- Never delegate delivery work to @general."
+      "permission": {
+        "task": {
+          "*": "deny",
+          "product-owner": "allow",
+          "tech-lead": "allow",
+          "team-lead": "allow",
+          "user-*": "allow",
+          "test-developer": "allow",
+          "code-reviewer": "allow",
+          "cyber-security-expert": "allow",
+          "*-backend-developer": "allow",
+          "*-frontend-developer": "allow",
+          "senior-developer-*": "allow",
+          "impl-*": "allow"
+        }
+      },
+      "prompt": "You are the Build agent. You have full tool access.\n\nWhen you need parallel work, spawn subagents via the Task tool (if permissions allow)."
+    },
+
+    "cyber-security-expert": {
+      "description": "Cyber Security Expert — finds vulnerabilities, threat models, and dependency risks; raises security tasks and coordinates remediation.",
+      "mode": "all",
+      "model": "github-copilot/gpt-5.2-codex",
+      "reasoningEffort": "high",
+      "temperature": 0.1,
+      "maxSteps": 40,
+      "tools": { "write": true, "edit": true, "bash": false, "webfetch": true },
+      "permission": {
+        "edit": "ask",
+        "bash": "deny",
+        "webfetch": "ask",
+        "task": {
+          "*": "deny",
+          "tech-lead": "allow",
+          "team-lead": "allow",
+          "test-developer": "allow",
+          "*-backend-developer": "allow",
+          "*-frontend-developer": "allow",
+          "senior-developer-*": "allow",
+          "impl-*": "allow",
+          "code-reviewer": "allow"
+        }
+      },
+      "prompt": "You are the Cyber Security Expert.\n\nReview for vulnerabilities and propose remediation tasks."
     },
 
     "code-reviewer": {
@@ -402,9 +325,9 @@
         "edit": "ask",
         "bash": "deny",
         "webfetch": "ask",
-        "task": { "*": "allow" }
+        "task": { "*": "deny" }
       },
-      "prompt": "You are a Code Reviewer specializing in software quality and documentation.\n\nYour role is to review code, tests, and documentation for adherence to best practices and project guidelines.\n\nKey principles to check:\n- SOLID\n- KISS\n- DRY\n- TDD\n- BDD\n\nDocumentation checks:\n- Features: src/test/resources/features\n- MD Docs: README, docs/*.md\n- Use Cases: docs/USE_CASES.md\n- UML: PlantUML diagrams in docs\n\nProject guidance:\n- Hexagonal architecture (ports/adapters)\n- Domain model in */domain/model (simple/immutable)\n- Application services in */application/service\n- Controllers in */presentation\n- Integration via adapters\n- Testing: JUnit 5 + Cucumber BDD\n\nOpen questions rule (mandatory):\n- If review is blocked by missing acceptance criteria or unclear intent, return an 'RFI for Originator' to the task Originator (Originator in task context).\n\nOutput format:\n- Summary of findings\n- Issues by category\n- Suggestions\n- Approval or rejection with reasons"
+      "prompt": "You are a Code Reviewer. Review diffs for quality and adherence to project rules. If blocked, return 'RFI for Originator'."
     }
   }
 }
