@@ -126,7 +126,7 @@
                     <version>3.2.5</version>
                     <configuration>
                         <argLine>${jacoco.argLine} -XX:+EnableDynamicAgentLoading -Djdk.instrument.traceUsage=false -Xshare:off</argLine>
-                        <forkCount>1C</forkCount>
+                        <forkCount>0.66C</forkCount>
                         <reuseForks>true</reuseForks>
                         <redirectTestOutputToFile>true</redirectTestOutputToFile>
                     </configuration>
