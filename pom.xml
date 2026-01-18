@@ -25,6 +25,7 @@
         <module>tui</module>
         <module>spring-shell</module>
         <module>vaadin-ui</module>
+        <module>coverage</module>
     </modules>
 
     <properties>
@@ -92,6 +93,24 @@
     </dependencyManagement>
 
     <build>
+        <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                        <configuration>
+                            <propertyName>jacoco.argLine</propertyName>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -125,10 +144,14 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>3.2.5</version>
                     <configuration>
-                        <argLine>${jacoco.argLine} -XX:+EnableDynamicAgentLoading -Djdk.instrument.traceUsage=false -Xshare:off</argLine>
+                        <argLine>@{jacoco.argLine} -XX:+EnableDynamicAgentLoading -Djdk.instrument.traceUsage=false -Xshare:off</argLine>
                         <forkCount>0.66C</forkCount>
                         <reuseForks>true</reuseForks>
                         <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                        <excludes>
+                            <exclude>**/*IT.java</exclude>
+                            <exclude>**/*IT.kt</exclude>
+                        </excludes>
                     </configuration>
                 </plugin>
             </plugins>
