@@ -1,5 +1,6 @@
 package com.training.coach.security;
 
+import com.training.coach.common.AuthTokens;
 import com.training.coach.user.application.port.out.SystemUserRepository;
 import com.training.coach.user.domain.model.SystemUser;
 import com.training.coach.user.infrastructure.persistence.UserCredentialsJpaRepository;
@@ -154,8 +155,6 @@ public class AuthService {
             throw new IllegalStateException("Failed to hash token", ex);
         }
     }
-
-    public record AuthTokens(String accessToken, String refreshToken, long expiresInSeconds) {}
 
     private record IssuedRefreshToken(String raw, String recordId) {}
 }
