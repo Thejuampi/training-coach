@@ -37,11 +37,15 @@ import io.cucumber.java.Before
 import io.cucumber.java.en.Given
 import io.cucumber.java.en.Then
 import io.cucumber.java.en.When
+import io.cucumber.spring.ScenarioScope
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.util.EnumSet
 import org.assertj.core.api.Assertions.assertThat
+import org.springframework.stereotype.Component
 
+@ScenarioScope
+@Component
 open class UseCaseSteps(
     private val athleteService: AthleteService,
     private val athleteRepository: AthleteRepository,

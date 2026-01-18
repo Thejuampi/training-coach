@@ -6,6 +6,7 @@ import io.cucumber.spring.CucumberContextConfiguration
 import java.time.LocalDate
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
+import io.cucumber.spring.ScenarioScope
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Import
@@ -21,6 +22,7 @@ class CucumberSpringConfiguration
 open class CucumberTestConfig {
     @Bean
     @Primary
+    @ScenarioScope
     open fun fitnessPlatformPort(): TestFitnessPlatformPort = TestFitnessPlatformPort()
 }
 
