@@ -92,30 +92,10 @@ mvn test
 
 # Run with coverage report
 mvn test jacoco:report
-```
 
-### Lessons Learned
+# Run aggregated coverage report (HTML at target/site/jacoco-aggregate/index.html)
+./mvnw verify
 
-- Prefer the Maven wrapper for consistent builds: `./mvnw verify` or `mvnw.cmd verify` on Windows.
-- When passing system properties in PowerShell, quote them (e.g., `mvnw.cmd verify`).
-- Code style is enforced by Spotless; if the build fails on formatting, run `mvn spotless:apply` and re-run the build.
-
-## Testing
-
-The project follows **Test-Driven Development (TDD)** with JUnit 5 and Kotlin tests.
-Acceptance tests for the documented use cases are written in **Cucumber (Gherkin)**.
-
-### Run Tests
-
-```bash
-# Run all tests
-mvn test
-
-# Run specific test class
-mvn test -Dtest=AthleteSpec
-
-# Run with coverage (minimum 80% line, 70% branch required)
-mvn test jacoco:report jacoco:check
 ```
 
 ### Code Quality
