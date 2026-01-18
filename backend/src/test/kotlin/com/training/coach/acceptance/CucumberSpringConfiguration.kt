@@ -26,23 +26,35 @@ open class CucumberTestConfig {
     open fun fitnessPlatformPort(): TestFitnessPlatformPort = TestFitnessPlatformPort()
 }
 
-class TestFitnessPlatformPort : FitnessPlatformPort {
-    private val activities: MutableList<FitnessPlatformPort.Activity> = mutableListOf()
-    private val wellnessData: MutableList<FitnessPlatformPort.WellnessData> = mutableListOf()
+open class TestFitnessPlatformPort : FitnessPlatformPort {
+    private var activities: MutableList<FitnessPlatformPort.Activity>? = null
+    private var wellnessData: MutableList<FitnessPlatformPort.WellnessData>? = null
 
     fun setActivities(newActivities: List<FitnessPlatformPort.Activity>) {
-        activities.clear()
-        activities.addAll(newActivities)
+        ensureInitialized()
+        activities?.clear()
+        activities?.addAll(newActivities)
     }
 
     fun setWellnessData(newWellnessData: List<FitnessPlatformPort.WellnessData>) {
-        wellnessData.clear()
-        wellnessData.addAll(newWellnessData)
+        ensureInitialized()
+        wellnessData?.clear()
+        wellnessData?.addAll(newWellnessData)
     }
 
     fun clear() {
-        activities.clear()
-        wellnessData.clear()
+        ensureInitialized()
+        activities?.clear()
+        wellnessData?.clear()
+    }
+
+    private fun ensureInitialized() {
+        if (activities == null) {
+            activities = mutableListOf()
+        }
+        if (wellnessData == null) {
+            wellnessData = mutableListOf()
+        }
     }
 
     override fun getActivities(
@@ -50,7 +62,8 @@ class TestFitnessPlatformPort : FitnessPlatformPort {
         startDate: LocalDate,
         endDate: LocalDate
     ): Result<List<FitnessPlatformPort.Activity>> {
-        val filtered = activities.filter { !it.date().isBefore(startDate) && !it.date().isAfter(endDate) }
+        ensureInitialized()
+        val filtered = activities.orEmpty().filter { !it.date().isBefore(startDate) && !it.date().isAfter(endDate) }
         return Result.success(filtered)
     }
 
@@ -58,7 +71,8 @@ class TestFitnessPlatformPort : FitnessPlatformPort {
         athleteId: String,
         date: LocalDate
     ): Result<FitnessPlatformPort.WellnessData> {
-        val found = wellnessData.firstOrNull { it.date() == date }
+        ensureInitialized()
+        val found = wellnessData.orEmpty().firstOrNull { it.date() == date }
             ?: return Result.failure(IllegalStateException("No wellness data for $date"))
         return Result.success(found)
     }
@@ -68,7 +82,8 @@ class TestFitnessPlatformPort : FitnessPlatformPort {
         startDate: LocalDate,
         endDate: LocalDate
     ): Result<List<FitnessPlatformPort.WellnessData>> {
-        val filtered = wellnessData.filter { !it.date().isBefore(startDate) && !it.date().isAfter(endDate) }
+        ensureInitialized()
+        val filtered = wellnessData.orEmpty().filter { !it.date().isBefore(startDate) && !it.date().isAfter(endDate) }
         return Result.success(filtered)
     }
 }

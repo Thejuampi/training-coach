@@ -14,6 +14,7 @@ import com.training.coach.athlete.infrastructure.persistence.AthleteJpaRepositor
 import com.training.coach.athlete.application.port.out.FitnessPlatformPort
 import com.training.coach.athlete.domain.model.Workout
 import com.training.coach.feedback.application.service.NoteService
+import com.training.coach.feedback.application.service.NoteService
 import com.training.coach.integration.application.service.IntegrationService
 import com.training.coach.shared.domain.unit.BeatsPerMinute
 import com.training.coach.shared.domain.unit.Centimeters
@@ -26,6 +27,16 @@ import com.training.coach.shared.domain.unit.Vo2Max
 import com.training.coach.shared.domain.unit.Watts
 import com.training.coach.sync.application.service.SyncService
 import com.training.coach.trainingplan.application.service.TrainingPlanService
+import com.training.coach.user.application.port.out.SystemUserRepository
+import com.training.coach.user.application.port.out.UserCredentialsRepository
+import com.training.coach.user.application.service.SystemUserService
+import com.training.coach.user.domain.model.DistanceUnit
+import com.training.coach.user.domain.model.HeightUnit
+import com.training.coach.user.domain.model.MeasurementSystem
+import com.training.coach.user.domain.model.SystemUser
+import com.training.coach.user.domain.model.UserPreferences
+import com.training.coach.user.domain.model.UserRole
+import com.training.coach.user.infrastructure.persistence.UserCredentialsJpaRepository
 import com.training.coach.wellness.application.port.out.WellnessRepository
 import com.training.coach.wellness.application.service.ReadinessCalculatorService
 import com.training.coach.wellness.domain.model.PhysiologicalData
@@ -34,6 +45,7 @@ import com.training.coach.wellness.domain.model.SubjectiveWellness
 import com.training.coach.wellness.domain.model.TrainingLoadSummary
 import com.training.coach.wellness.infrastructure.persistence.WellnessJpaRepository
 import io.cucumber.java.Before
+import io.cucumber.java.en.And
 import io.cucumber.java.en.Given
 import io.cucumber.java.en.Then
 import io.cucumber.java.en.When
@@ -42,10 +54,8 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.util.EnumSet
 import org.assertj.core.api.Assertions.assertThat
-import org.springframework.stereotype.Component
 
 @ScenarioScope
-@Component
 open class UseCaseSteps(
     private val athleteService: AthleteService,
     private val athleteRepository: AthleteRepository,
