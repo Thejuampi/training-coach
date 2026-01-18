@@ -106,7 +106,10 @@ IDs are stable; names can evolve. "Now" indicates what we should support early i
 | UC14 | Reports & Exports | Coach/Admin | Soon | Weekly summaries, PDF/CSV export, audit |
 | UC15 | Admin & Roles | Admin | Yes | Users, roles, permissions (real auth later) |
 | UC16 | Safety & Guardrails | System | Yes | Caps, injury/fatigue safeguards, AI constraints |
-| UC0 | Authenticate & Start Session | Athlete/Coach/Admin | Yes | Basic auth now; session context for UI |
+| UC0 | Authenticate & Start Session | Athlete/Coach (Admin in dev only) | Yes | Username + password; session context for TUI |
+| UC21 | Register User | Unauthenticated User | Yes | Create Athlete/Coach user from Login (username-only) |
+| UC22 | Reset Password | Unauthenticated User | Yes | Self-service reset code shown in TUI (no email/SMS) |
+| UC23 | Dev-mode Seed Users | System | Yes (Dev only) | Seeds `admin/admin`, `test-athlete/test`, `test-coach/test` |
 | UC17 | Workout Library | Coach | Later | Workout templates, reuse, sharing |
 | UC18 | Multi-Platform Reconciliation | System | Later | Merge duplicates, source of truth rules |
 | UC19 | Athlete Self-Service Settings | Athlete | Later | Preferences, units, privacy controls |
@@ -118,16 +121,21 @@ Each use case now has its own Markdown document containing a PlantUML use case d
 
 ## UC0: Authenticate & Start Session
 
-**Goal:** Establish a secure session and load role-based access.
+**Goal:** Establish a session and load role-based access from a Login-first TUI.
 
-- Actors: Athlete, Coach, Admin.
+- Actors: Athlete, Coach. (Admin may authenticate in dev mode only; see UC23.)
+- Trigger:
+  - Application starts with no active session.
 - Main flow:
-  1) User provides credentials (basic auth now; future SSO/JWT).
-  2) System validates credentials against persisted users/roles.
-  3) Session initializes UI context (role, selected athlete scope).
+  1) System displays the Login screen as the initial TUI screen.
+  2) User enters `username` + `password`.
+  3) System validates credentials against persisted users/roles.
+  4) Session initializes UI context (role, selected athlete scope).
 - Alt flows:
-  - Invalid credentials -> deny access; show error.
+  - Invalid credentials -> deny access; show error; apply per-session throttling.
   - Disabled user -> deny access with remediation guidance.
+  - User selects "Create account" -> proceed to UC21.
+  - User selects "Reset password" -> proceed to UC22.
 
 ## UC1: Manage Athlete
 
@@ -321,6 +329,8 @@ Each use case now has its own Markdown document containing a PlantUML use case d
   2) Configure organization/team structures (optional).
   3) Manage operational settings (rate limits, feature flags).
 
+**Note (MVP constraint):** Admin is not allowed via the user-facing registration UI. Admin authentication is supported only in dev mode via seeded credentials (UC23).
+
 ## UC16: Safety & Guardrails
 
 **Goal:** Prevent unsafe training prescriptions and constrain AI.
@@ -331,8 +341,83 @@ Each use case now has its own Markdown document containing a PlantUML use case d
   2) Require coach approval for major changes.
   3) Constrain AI prompts/outputs to safe boundaries; log AI usage for audit.
 
+## UC21: Register User (Athlete/Coach)
+
+- **Primary actor:** Unauthenticated user
+- **Goal / value:** Create an account to access the system as an athlete or coach.
+- **Preconditions:**
+  - User is not authenticated.
+  - Login screen is shown.
+- **Trigger:** User selects "Create account" from Login.
+- **Main flow:**
+  1) System displays Registration screen.
+  2) User enters `username` (required), `display name` (optional), and `password` (required).
+  3) User selects role: Athlete or Coach.
+  4) System validates:
+     - username uniqueness
+     - password policy (minimum 8 characters)
+     - role is not Admin
+  5) System creates the user.
+  6) System returns to Login screen and displays a success message.
+- **Postconditions:**
+  - New user exists with role Athlete or Coach.
+- **Alternative flows:**
+  - Username already exists -> show error; user remains on Registration screen.
+  - Password too short -> show validation message.
+  - User cancels -> return to Login.
+- **Non-functional requirements (relevant):**
+  - Password is stored securely (hashing approach is a technical decision).
+  - Prevent role escalation: Admin cannot be created via registration UI.
+
+## UC22: Reset Password (Self-Service in TUI)
+
+- **Primary actor:** Unauthenticated user
+- **Goal / value:** Regain access by resetting password without email/SMS dependency.
+- **Preconditions:**
+  - User is not authenticated.
+  - Login screen is shown.
+- **Trigger:** User selects "Reset password" from Login.
+- **Main flow:**
+  1) System displays Password Reset screen.
+  2) User enters `username`.
+  3) System responds with a generic confirmation message (avoid account enumeration).
+  4) System generates a short-lived one-time reset code (e.g., 10 minutes).
+  5) System displays the reset code in the TUI.
+  6) User enters reset code and a new password (minimum 8 characters).
+  7) System validates code and updates the password.
+  8) System returns to Login screen and displays a success message.
+- **Postconditions:**
+  - User password is updated.
+- **Alternative flows:**
+  - Invalid/expired reset code -> show error; allow retry (generate a new code).
+  - Password too short -> show validation message.
+  - User cancels -> return to Login.
+- **Non-functional requirements (relevant):**
+  - Per-session throttling for repeated failed attempts.
+  - Generic responses for username submission to reduce account enumeration risk.
+
+## UC23: Dev-mode Seed Users
+
+- **Primary actor:** System
+- **Goal / value:** Speed up local development with deterministic credentials.
+- **Preconditions:**
+  - Application is running in dev mode.
+- **Trigger:** Application startup.
+- **Main flow:**
+  1) System checks if seed users already exist.
+  2) If missing, system creates the following users:
+     - `admin` with password `admin` (Admin role; dev only; may authenticate via Login)
+     - `test-athlete` with password `test` (Athlete role)
+     - `test-coach` with password `test` (Coach role)
+  3) System does not offer Admin in the Registration UI.
+- **Alternative flows:**
+  - Seed users already exist -> do nothing.
+- **Non-functional requirements (relevant):**
+  - Must never run in production mode.
+  - Seeding is idempotent.
+
 ## Use Case Grouping by Phase
 
-- **Phase 1 (MVP)**: UC1, UC2, UC3 (draft + publish), UC5 (basic), UC8 (notes), UC9 (Intervals.icu), UC16 (basic guardrails).
+- **Phase 1 (MVP)**: UC0 (Login-first), UC21 (registration), UC22 (password reset), UC23 (dev seed users), UC1, UC2, UC3 (draft + publish), UC5 (basic), UC8 (notes), UC9 (Intervals.icu), UC16 (basic guardrails).
 - **Phase 2**: UC4 (structured feedback), UC6 (real matching), UC7 (versioned adjustments), UC10 (zones), UC11 (availability), UC13 (notifications).
 - **Phase 3**: UC12 (events), UC14 (exports/audit), UC15 (real auth/permissions), UC17/UC18/UC20 (library/reconciliation/privacy).
