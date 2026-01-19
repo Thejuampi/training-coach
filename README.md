@@ -87,11 +87,17 @@ mvn clean install
 # Run the application (dev profile)
 mvn spring-boot:run -Dspring-boot.run.profiles=dev
 
-# Run tests with TDD
-mvn test
+# Run tests with TDD (fast feedback)
+./mvnw test
+
+# Run a single test class
+./mvnw -pl backend -Dtest=AuthControllerTest test
+
+# Run Cucumber acceptance tests (fast, in-memory ports)
+./mvnw -pl backend -Dtest=CucumberTest test
 
 # Run with coverage report
-mvn test jacoco:report
+./mvnw test jacoco:report
 
 # Run aggregated coverage report (HTML at target/site/jacoco-aggregate/index.html)
 ./mvnw verify
@@ -121,6 +127,22 @@ mvn checkstyle:check
 3. Refactor while keeping tests green (TDD Refactor)
 4. Ensure coverage meets thresholds (80% line, 70% branch)
 5. Verify code quality (Spotless, SpotBugs, Checkstyle)
+
+## Testing
+
+This project emphasizes **blazing fast tests** with concurrent execution for rapid feedback.
+
+### Test Types
+- **Unit Tests**: JUnit 5 with Kotlin, focused on domain logic
+- **Integration Tests**: Spring context tests for services
+- **Acceptance Tests**: Cucumber BDD with in-memory ports (no external IO)
+
+### Concurrency in Acceptance Tests
+- **Thread Safety**: Cucumber tests run concurrently for speed. Beans holding state (e.g., in-memory repositories) use `@ScenarioScope` for per-scenario isolation.
+- **Data Structures**: Repositories employ `ConcurrentHashMap` for thread-safe operations without blocking.
+- **Stateless Services**: Application services are stateless singletons, safe for concurrent access.
+- **Step Classes**: `UseCaseSteps` is `@ScenarioScope` to prevent shared field state across scenarios.
+- **Why?**: Ensures test interference is eliminated, maintaining fast and reliable parallel execution.
 
 ## API Documentation
 

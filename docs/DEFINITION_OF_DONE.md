@@ -13,6 +13,7 @@ Use this checklist for each feature epic and UI view before calling it "done".
 - Unit tests or component tests cover core logic.
 - Edge cases and error states are documented and tested.
 - Logs and audit records are produced where required.
+- Acceptance tests remain fast (no context resets, prefer in-memory ports, avoid external IO).
 
 ## Security & Privacy
 

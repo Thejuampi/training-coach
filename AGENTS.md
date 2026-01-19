@@ -36,8 +36,8 @@ Docs:
   - If blocked: make conservative assumptions and record them.
 
 - **tech-lead**:
-  - Converts validated use cases/scenarios into technical design + **dev-ready tickets**.
-  - Mandatory delegation: spawn developer agents for implementation work.
+-  - Converts validated use cases/scenarios into technical design + **dev-ready tickets**.
+-  - Prefer delegation: spawn developer agents for implementation work unless the user explicitly asks the tech lead to implement a task itself; document any deviation as an assumption.
 
 - **team-lead**:
   - Coordinates PO/TL/Devs; must spawn developer agents when tickets are ready.
@@ -56,6 +56,9 @@ Docs:
 
 - **user-coach / user-athlete / user-admin**:
   - Simulated user personas for feedback; do not implement code.
+
+## Review workflow
+- After any code change, request formal reviews from both the `code-reviewer` and `cyber-security-expert` agents; include a summary of modifications and test artifacts in each review request.
 
 ## Build / test / lint
 
@@ -116,9 +119,14 @@ mvnw.cmd clean verify
 ### Cucumber acceptance tests
 - Features: `backend/src/test/resources/features/*.feature`
 - Step defs (Kotlin): `backend/src/test/kotlin/com/training/coach/acceptance`
+- Keep tests fast: prefer in-memory ports, avoid external IO, no `@DirtiesContext`.
 - Run via standard test task:
 ```bash
 ./mvnw -pl backend test
+```
+- Run only Cucumber:
+```bash
+./mvnw -pl backend -Dtest=CucumberTest test
 ```
 
 ### Coverage
@@ -192,6 +200,13 @@ TUI profile `openapi-client` generates a WebClient client from `api/openapi.json
 - WebFlux controllers may use `WebTestClient` (direct controller binding or Spring context).
 - Cucumber tests use Spring + Kotlin step defs; reuse the existing
   `TestFitnessPlatformPort` in `CucumberSpringConfiguration.kt` when possible.
+
+### Concurrency in acceptance tests
+- **Thread Safety**: Cucumber tests are designed to run concurrently for speed. Use `@ScenarioScope` for beans holding state (e.g., in-memory repositories) to ensure isolation per scenario.
+- **Data Structures**: In-memory repositories use `ConcurrentHashMap` for thread-safe operations without blocking.
+- **Stateless Services**: Application services are stateless singletons, safe for concurrent access.
+- **Step Classes**: `UseCaseSteps` is `@ScenarioScope` to avoid shared field state across scenarios.
+- **Why?**: Prevents test interference and data corruption in parallel runs, maintaining blazing fast execution.
 
 ## Copilot/Cursor rules
 - Copilot instructions live in `.github/copilot-instructions.md` and are included above.
