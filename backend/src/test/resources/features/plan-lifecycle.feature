@@ -9,7 +9,6 @@ Scenario: Draft generation produces a draft plan
     Then a draft plan exists
     And the draft plan has workouts assigned on athlete available days
 
-@wip
 Scenario: Publishing a plan makes it visible to athlete
     Given a draft plan exists for a saved athlete
     When the coach publishes the draft plan

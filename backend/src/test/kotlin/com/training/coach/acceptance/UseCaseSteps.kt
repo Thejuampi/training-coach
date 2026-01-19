@@ -36,6 +36,7 @@ import com.training.coach.trainingplan.application.port.out.PlanRepository
 import com.training.coach.trainingplan.application.service.TrainingPlanService
 import com.training.coach.trainingplan.application.service.PlanService
 import com.training.coach.trainingplan.domain.model.PlanSummary
+import com.training.coach.testconfig.inmemory.TestFitnessPlatformPort
 import com.training.coach.trainingplan.domain.model.PlanVersion
 import com.training.coach.trainingplan.infrastructure.persistence.PlanVersionJpaRepository
 import com.training.coach.trainingplan.infrastructure.persistence.PlanWorkoutJpaRepository
@@ -1070,6 +1071,12 @@ open class UseCaseSteps(
         assertThat(workoutDays).isSubsetOf(availableDays)
     }
 
+    @When("the coach publishes the draft plan")
+    fun coachPublishesDraftPlan() {
+        val plan = requireNotNull(planSummary)
+        planSummary = planService.publishPlan(plan.id())
+    }
+
     @Given("a draft plan exists for a saved athlete")
     fun draftPlanExistsForSavedAthlete() {
         if (savedAthlete == null) {
@@ -1082,6 +1089,19 @@ open class UseCaseSteps(
         val athlete = requireNotNull(savedAthlete)
         val command = PlanService.CreatePlanCommand(athlete.id(), "base", LocalDate.of(2026, 1, 1), Hours.of(8.0))
         planSummary = planService.createPlan(command)
+    }
+
+    @Given("a published plan exists for a saved athlete")
+    fun publishedPlanExistsForSavedAthlete() {
+        draftPlanExistsForSavedAthlete()
+        val plan = requireNotNull(planSummary)
+        planSummary = planService.publishPlan(plan.id())
+    }
+
+    @Then("the plan has a new version")
+    fun planHasNewVersion() {
+        val plan = requireNotNull(planSummary)
+        assertThat(plan.currentVersion()).isGreaterThan(1)
     }
 
     @When("the coach revises the plan and reduces weekly hours by {double}")
@@ -1108,14 +1128,23 @@ open class UseCaseSteps(
     @And("the plan is excluded from active plan lists")
     fun planExcludedFromActiveLists() {
         val plan = requireNotNull(planSummary)
-        val activePlans = planService.listPlans().filter { it.status() != PlanVersionStatus.ARCHIVED }
-        assertThat(activePlans).doesNotContain(plan)
+        val activePlans = planService.getPlansForAthlete(plan.athleteId())
+        assertThat(activePlans.none { it.id() == plan.id() }).isTrue
     }
 
     @And("the plan has a publish timestamp")
     fun planHasPublishTimestamp() {
         val plan = requireNotNull(planSummary)
-        assertThat(plan.createdAt()).isNotNull
+        assertThat(plan.publishedAt()).isNotNull
+    }
+
+    @Then("the athlete can view the plan as \"published\"")
+    fun athleteCanViewPlanAsPublished() {
+        val athlete = requireNotNull(savedAthlete)
+        val plans = planService.getPlansForAthlete(athlete.id())
+        assertThat(plans).isNotEmpty
+        val plan = plans.first()
+        assertThat(plan.status()).isEqualTo(PlanVersionStatus.PUBLISHED)
     }
 
     @And("previous versions remain accessible")

@@ -9,17 +9,22 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import com.training.coach.testconfig.InMemoryRepositoriesTestConfig;
+
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.NONE,
         properties = {"spring.profiles.active=test", "intervals.icu.api-key=${INTERVALS_ICU_API_KEY}"})
+@Import(InMemoryRepositoriesTestConfig.class)
 @EnabledIfEnvironmentVariable(named = "INTERVALS_ICU_API_KEY", matches = ".+")
 @DisplayName("Intervals.icu connectivity")
 class IntervalsIcuConnectivityTest {
+
 
     @Value("${intervals.icu.api-key}")
     private String apiKey;

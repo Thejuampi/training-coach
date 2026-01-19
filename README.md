@@ -137,6 +137,19 @@ This project emphasizes **blazing fast tests** with concurrent execution for rap
 - **Integration Tests**: Spring context tests for services
 - **Acceptance Tests**: Cucumber BDD with in-memory ports (no external IO)
 
+### Test Configurations
+We use dedicated Spring test configs to keep startup fast while preserving core application beans.
+
+- Use `@Profile("test")` on test replacement beans (in-memory or test adapters).
+- Use `@Profile("!test")` on production adapters so Spring does not instantiate them during tests.
+- Prefer wiring in-memory repositories/adapters over mocks.
+
+Available configs (test-only):
+- `backend/src/test/java/com/training/coach/testconfig/InMemoryRepositoriesTestConfig.java`
+- `backend/src/test/java/com/training/coach/testconfig/ExternalPortsTestConfig.java`
+- `backend/src/test/java/com/training/coach/testconfig/AuthTestConfig.java`
+- `backend/src/test/java/com/training/coach/testconfig/WebTestConfig.java`
+
 ### Concurrency in Acceptance Tests
 - **Thread Safety**: Cucumber tests run concurrently for speed. Beans holding state (e.g., in-memory repositories) use `@ScenarioScope` for per-scenario isolation.
 - **Data Structures**: Repositories employ `ConcurrentHashMap` for thread-safe operations without blocking.

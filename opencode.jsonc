@@ -145,12 +145,12 @@
       "temperature": 0.1,
       "maxSteps": 100,
       "tools": {
+        "question": true,
         "write": true,
         "edit": true,
         "bash": true,
         "webfetch": true,
         "read": true,
-        "question": true,
         "todoread": true,
         "todowrite": true,
         "patch": true,
@@ -159,7 +159,10 @@
         "grep": true
       },
       "permission": {
-        "edit": "ask",
+        "skills": {
+          "*": "allow"
+        },
+        "edit": "allow",
         "websearch": "allow",
         "read": "allow",
         "question": "allow",
@@ -320,7 +323,7 @@
           "cyber-security-expert": "allow"
         }
       },
-      "prompt": "You are a Senior Backend Developer. Implement dev-ready tickets only. TDD-first.\n\nOpen questions rule (mandatory):\n- Route blockers to Tech Lead under: 'RFI for Tech Lead' (question, why it blocks, options).\n- Escalate to Product Owner only if Tech Lead confirms product-intent ambiguity.\n- Do not block on the Originator for routine implementation questions."
+      "prompt": "You are a Senior Backend Developer. Implement dev-ready tickets only. TDD-first.\n\nTesting rules:\n- Do not use @MockBean for repositories; instead, use in-memory implementations. Check for existing implementations; if none, create a class or extend an abstract one with the specific generics.\n\nOpen questions rule (mandatory):\n- Route blockers to Tech Lead under: 'RFI for Tech Lead' (question, why it blocks, options).\n- Escalate to Product Owner only if Tech Lead confirms product-intent ambiguity.\n- Do not block on the Originator for routine implementation questions."
     },
 
     "maria-frontend-developer": {
@@ -382,7 +385,7 @@
           "cyber-security-expert": "allow"
         }
       },
-      "prompt": "You are a Senior Frontend Developer. Implement dev-ready UI tickets only.\n\nOpen questions rule (mandatory):\n- Route blockers to Tech Lead under: 'RFI for Tech Lead' (question, why it blocks, options).\n- Escalate to Product Owner only if Tech Lead confirms product-intent ambiguity.\n- Do not block on the Originator for routine implementation questions."
+      "prompt": "You are a Senior Frontend Developer. Implement dev-ready UI tickets only.\n\nTesting rules:\n- Do not use @MockBean for repositories; instead, use in-memory implementations. Check for existing implementations; if none, create a class or extend an abstract one with the specific generics.\n\nOpen questions rule (mandatory):\n- Route blockers to Tech Lead under: 'RFI for Tech Lead' (question, why it blocks, options).\n- Escalate to Product Owner only if Tech Lead confirms product-intent ambiguity.\n- Do not block on the Originator for routine implementation questions."
     },
 
     "test-developer": {
@@ -443,7 +446,7 @@
           "cyber-security-expert": "allow"
         }
       },
-      "prompt": "You are a Test Developer (execution-only). Add/extend tests mapped to acceptance criteria.\n\nOpen questions rule (mandatory):\n- Route blockers to Tech Lead under: 'RFI for Tech Lead' (question, why it blocks, options).\n- Escalate to Product Owner only if Tech Lead confirms product-intent ambiguity.\n- Do not block on the Originator for routine implementation questions."
+      "prompt": "You are a Test Developer (execution-only). Add/extend tests mapped to acceptance criteria.\n\nTesting rules:\n- Do not use @MockBean for repositories; instead, use in-memory implementations. Check for existing implementations; if none, create a class or extend an abstract one with the specific generics.\n\nOpen questions rule (mandatory):\n- Route blockers to Tech Lead under: 'RFI for Tech Lead' (question, why it blocks, options).\n- Escalate to Product Owner only if Tech Lead confirms product-intent ambiguity.\n- Do not block on the Originator for routine implementation questions."
     },
     "workflow-orchestrator": {
       "description": "Primary orchestrator: enforces PO to TL to Dev flow and resolves RFIs without blocking on Originator by default.",

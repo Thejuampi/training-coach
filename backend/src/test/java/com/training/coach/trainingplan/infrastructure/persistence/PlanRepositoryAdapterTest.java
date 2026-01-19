@@ -31,7 +31,7 @@ class PlanRepositoryAdapterTest {
         PlanRepositoryAdapter adapter = new PlanRepositoryAdapter(trainingPlanRepo, planVersionRepo, planWorkoutRepo);
 
         Instant createdAt = Instant.parse("2024-01-01T00:00:00Z");
-        PlanSummary planSummary = new PlanSummary("plan-1", "athlete-1", 1, PlanVersionStatus.DRAFT, createdAt);
+        PlanSummary planSummary = new PlanSummary("plan-1", "athlete-1", 1, PlanVersionStatus.DRAFT, createdAt, null);
 
         adapter.save(planSummary);
 
@@ -40,7 +40,7 @@ class PlanRepositoryAdapterTest {
         TrainingPlanEntity saved = captor.getValue();
         assertThat(saved.getTitle()).isEqualTo("Plan plan-1");
         assertThat(saved.getCreatedAt()).isEqualTo(createdAt);
-        assertThat(saved.getUpdatedAt()).isNull();
+        assertThat(saved.getPublishedAt()).isNull();
     }
 
     @Test

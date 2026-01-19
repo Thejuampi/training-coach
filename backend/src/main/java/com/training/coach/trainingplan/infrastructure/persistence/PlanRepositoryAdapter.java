@@ -47,6 +47,7 @@ public class PlanRepositoryAdapter implements PlanRepository {
         entity.setAthleteId(plan.athleteId());
         entity.setTitle(defaultTitle(plan));
         entity.setCreatedAt(plan.createdAt());
+        entity.setPublishedAt(plan.publishedAt());
         trainingPlanRepo.save(entity);
         return plan;
     }
@@ -61,7 +62,7 @@ public class PlanRepositoryAdapter implements PlanRepository {
             int currentVersion =
                     latestVersion.map(PlanVersionEntity::getVersion).orElse(1);
             return new PlanSummary(
-                    entity.getId(), entity.getAthleteId(), currentVersion, status, entity.getCreatedAt());
+                    entity.getId(), entity.getAthleteId(), currentVersion, status, entity.getCreatedAt(), entity.getPublishedAt());
         });
     }
 
@@ -76,7 +77,7 @@ public class PlanRepositoryAdapter implements PlanRepository {
                     int currentVersion =
                             latestVersion.map(PlanVersionEntity::getVersion).orElse(1);
                     return new PlanSummary(
-                            entity.getId(), entity.getAthleteId(), currentVersion, status, entity.getCreatedAt());
+                            entity.getId(), entity.getAthleteId(), currentVersion, status, entity.getCreatedAt(), entity.getPublishedAt());
                 })
                 .collect(Collectors.toList());
     }

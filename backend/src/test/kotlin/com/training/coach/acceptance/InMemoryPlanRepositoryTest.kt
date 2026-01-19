@@ -2,6 +2,7 @@ package com.training.coach.acceptance
 
 import com.training.coach.athlete.domain.model.Workout
 import com.training.coach.shared.domain.unit.*
+import com.training.coach.testconfig.inmemory.InMemoryPlanRepository
 import com.training.coach.trainingplan.domain.model.PlanSummary
 import com.training.coach.trainingplan.domain.model.PlanVersion
 import com.training.coach.trainingplan.infrastructure.persistence.entity.PlanVersionStatus
@@ -165,7 +166,7 @@ class InMemoryPlanRepositoryTest {
     }
 
     private fun createTestPlanSummary(id: String): PlanSummary {
-        return PlanSummary(id, "athlete-1", 1, PlanVersionStatus.DRAFT, Instant.now())
+        return PlanSummary(id, "athlete-1", 1, PlanVersionStatus.DRAFT, Instant.now(), null)
     }
 
     private fun createTestPlanVersion(planId: String, version: Int, status: PlanVersionStatus = PlanVersionStatus.DRAFT): PlanVersion {

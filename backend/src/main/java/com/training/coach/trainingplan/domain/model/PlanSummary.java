@@ -7,4 +7,4 @@ import java.time.Instant;
  * Domain model for plan summary.
  */
 public record PlanSummary(
-        String id, String athleteId, int currentVersion, PlanVersionStatus status, Instant createdAt) {}
+        String id, String athleteId, int currentVersion, PlanVersionStatus status, Instant createdAt, Instant publishedAt) {}

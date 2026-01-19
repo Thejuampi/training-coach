@@ -1,35 +1,39 @@
 package com.training.coach.user.presentation;
 
-import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.mockUser;
 
-import com.training.coach.shared.functional.Result;
-import com.training.coach.user.application.service.SystemUserService;
+import com.training.coach.testconfig.AuthTestConfig;
+import com.training.coach.testconfig.WebTestConfig;
+import com.training.coach.user.application.port.out.SystemUserRepository;
+import com.training.coach.user.application.port.out.UserCredentialsRepository;
+import com.training.coach.user.domain.model.SystemUser;
+import com.training.coach.user.domain.model.UserPreferences;
+import com.training.coach.user.domain.model.UserRole;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.annotation.Order;
-import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.web.server.SecurityWebFilterChain;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import com.training.coach.AbstractWebFluxControllerTest;
 
 @SpringBootTest(properties = "intervals.icu.api-key=test", webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@Import(UserControllerIT.TestSecurityConfig.class)
+@Import({WebTestConfig.class, AuthTestConfig.class})
 class UserControllerIT extends AbstractWebFluxControllerTest {
 
-    @MockitoBean
-    private SystemUserService userService;
+    @Autowired
+    private SystemUserRepository systemUserRepository;
+
+    @Autowired
+    private UserCredentialsRepository userCredentialsRepository;
 
     @Test
     void getCredentialsSummaryDoesNotExposePassword() {
         String userId = "user-1";
-        SystemUserService.UserCredentialsSummary summary =
-                new SystemUserService.UserCredentialsSummary(userId, "coach_a", true);
-
-        when(userService.getCredentialsSummary(userId)).thenReturn(Result.success(summary));
+        String username = "coach_a";
+        String passwordHash = "hashed";
+        SystemUser user = new SystemUser(userId, "Coach A", UserRole.COACH, UserPreferences.metricDefaults());
+        systemUserRepository.save(user);
+        userCredentialsRepository.save(userId, username, passwordHash, true);
 
         webTestClient
                 .mutateWith(mockUser().roles("ADMIN"))
@@ -42,21 +46,10 @@ class UserControllerIT extends AbstractWebFluxControllerTest {
                 .jsonPath("$.userId")
                 .isEqualTo(userId)
                 .jsonPath("$.username")
-                .isEqualTo("coach_a")
+                .isEqualTo(username)
                 .jsonPath("$.enabled")
                 .isEqualTo(true)
                 .jsonPath("$.passwordHash")
                 .doesNotExist();
-    }
-
-    @TestConfiguration
-    static class TestSecurityConfig {
-        @Bean
-        @Order(0)
-        SecurityWebFilterChain testSecurityWebFilterChain(ServerHttpSecurity http) {
-            return http.csrf(ServerHttpSecurity.CsrfSpec::disable)
-                    .authorizeExchange(exchange -> exchange.anyExchange().permitAll())
-                    .build();
-        }
     }
 }

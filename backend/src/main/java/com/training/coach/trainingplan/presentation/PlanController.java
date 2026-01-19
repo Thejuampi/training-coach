@@ -49,10 +49,14 @@ public class PlanController {
     }
 
     @PostMapping("/{planId}/revise")
-    public ResponseEntity<PlanSummary> revisePlan(@PathVariable String planId) {
-        PlanSummary plan = planService.revisePlan(planId);
+    public ResponseEntity<PlanSummary> revisePlan(@PathVariable String planId, @RequestBody RevisePlanRequest request) {
+        PlanService.RevisePlanCommand command =
+                new PlanService.RevisePlanCommand(planId, request.newWeeklyHours());
+        PlanSummary plan = planService.revisePlan(command);
         return ResponseEntity.ok(plan);
     }
+
+    public record RevisePlanRequest(Hours newWeeklyHours) {}
 
     public record CreatePlanRequest(String athleteId, String phase, LocalDate startDate, Hours targetWeeklyHours) {}
 }

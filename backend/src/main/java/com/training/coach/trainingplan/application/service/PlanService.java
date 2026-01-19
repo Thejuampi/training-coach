@@ -44,7 +44,7 @@ public class PlanService {
 
         String planId = UUID.randomUUID().toString();
         PlanSummary planSummary =
-                new PlanSummary(planId, command.athleteId(), 1, PlanVersionStatus.DRAFT, Instant.now());
+                new PlanSummary(planId, command.athleteId(), 1, PlanVersionStatus.DRAFT, Instant.now(), null);
         planRepository.save(planSummary);
 
         PlanVersion version = PlanVersion.create(planId, 1, generatedPlan.workouts());
@@ -61,7 +61,7 @@ public class PlanService {
         }
         planRepository.updateVersionStatus(planId, plan.currentVersion(), PlanVersionStatus.PUBLISHED);
         PlanSummary updated = new PlanSummary(
-                plan.id(), plan.athleteId(), plan.currentVersion(), PlanVersionStatus.PUBLISHED, plan.createdAt());
+                plan.id(), plan.athleteId(), plan.currentVersion(), PlanVersionStatus.PUBLISHED, plan.createdAt(), Instant.now());
         planRepository.save(updated);
         return updated;
     }
@@ -82,9 +82,15 @@ public class PlanService {
         PlanVersion newVersionObj = PlanVersion.create(plan.id(), newVersion, newPlan.workouts());
         planRepository.saveVersion(newVersionObj);
         PlanSummary updated =
-                new PlanSummary(plan.id(), plan.athleteId(), newVersion, PlanVersionStatus.DRAFT, plan.createdAt());
+                new PlanSummary(plan.id(), plan.athleteId(), newVersion, PlanVersionStatus.DRAFT, plan.createdAt(), plan.publishedAt());
         planRepository.save(updated);
         return updated;
+    }
+
+    public List<PlanSummary> getPlansForAthlete(String athleteId) {
+        return planRepository.findAll().stream()
+                .filter(plan -> plan.athleteId().equals(athleteId) && plan.status() == PlanVersionStatus.PUBLISHED)
+                .toList();
     }
 
     public List<PlanSummary> listPlans() {
@@ -105,7 +111,7 @@ public class PlanService {
         }
         planRepository.updateVersionStatus(planId, plan.currentVersion(), PlanVersionStatus.ARCHIVED);
         PlanSummary updated = new PlanSummary(
-                plan.id(), plan.athleteId(), plan.currentVersion(), PlanVersionStatus.ARCHIVED, plan.createdAt());
+                plan.id(), plan.athleteId(), plan.currentVersion(), PlanVersionStatus.ARCHIVED, plan.createdAt(), plan.publishedAt());
         planRepository.save(updated);
         return updated;
     }

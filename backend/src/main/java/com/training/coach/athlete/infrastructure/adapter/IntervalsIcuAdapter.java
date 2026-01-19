@@ -35,6 +35,7 @@ import reactor.util.retry.Retry;
  * Adapter for Intervals.icu fitness platform.
  */
 @Component
+@org.springframework.context.annotation.Profile("!test")
 public class IntervalsIcuAdapter implements FitnessPlatformPort {
 
     private static final String CACHE_ACTIVITIES = "intervalsActivities";

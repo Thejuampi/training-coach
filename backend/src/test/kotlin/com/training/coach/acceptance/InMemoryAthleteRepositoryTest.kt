@@ -5,6 +5,7 @@ import com.training.coach.athlete.domain.model.AthleteProfile
 import com.training.coach.athlete.domain.model.TrainingMetrics
 import com.training.coach.athlete.domain.model.TrainingPreferences
 import com.training.coach.shared.domain.unit.*
+import com.training.coach.testconfig.inmemory.InMemoryAthleteRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.DayOfWeek

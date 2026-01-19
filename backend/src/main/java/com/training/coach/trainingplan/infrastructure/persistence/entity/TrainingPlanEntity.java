@@ -22,6 +22,9 @@ public class TrainingPlanEntity {
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
 
+    @Column(name = "published_at")
+    private Instant publishedAt;
+
     @Column(name = "updated_at")
     private Instant updatedAt;
 
@@ -71,6 +74,14 @@ public class TrainingPlanEntity {
 
     public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Instant getPublishedAt() {
+        return publishedAt;
+    }
+
+    public void setPublishedAt(Instant publishedAt) {
+        this.publishedAt = publishedAt;
     }
 
     public Instant getUpdatedAt() {
