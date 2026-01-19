@@ -27,7 +27,6 @@ Feature: Coach workflows
     Then the system recommends requesting a testing protocol
     And the coach sees available test protocols for FTP and threshold tests
 
-  @wip
   Scenario: UC3 Generate Training Plan
     Given a saved athlete with availability "MONDAY,WEDNESDAY,FRIDAY" weekly volume 10.0 phase "base"
     When the coach requests a plan for phase "base" start date "2026-01-01" target weekly hours 10.0

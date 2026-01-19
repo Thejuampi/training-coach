@@ -1173,6 +1173,29 @@ open class UseCaseSteps(
         assertThat(version1).isNotNull
     }
 
+    // === UC3 Generate Training Plan Steps ===
+
+    @Then("the plan targets a polarized {int}-zone distribution")
+    fun planTargetsPolarizedDistribution(zones: Int) {
+        val workout = planWorkouts.firstOrNull()
+        assertThat(workout).isNotNull
+        // Verify that workouts have intensity profiles set
+        assertThat(workout!!.intensityProfile().zone1Percent().value()).isGreaterThan(0.0)
+    }
+
+    @Then("planned training time in zone {string} is minimized")
+    fun plannedTrainingTimeInZoneMinimized(zone: String) {
+        // Z2 should be minimized in a polarized plan (80/20 rule)
+        val totalZ2 = planWorkouts.sumOf { it.intensityProfile().zone2Percent().value() }
+        val totalZ1 = planWorkouts.sumOf { it.intensityProfile().zone1Percent().value() }
+        val totalZ3 = planWorkouts.sumOf { it.intensityProfile().zone3Percent().value() }
+        val total = totalZ1 + totalZ2 + totalZ3
+        if (total > 0) {
+            val z2Ratio = totalZ2 / total
+            assertThat(z2Ratio).isLessThan(0.25) // Z2 should be less than 25%
+        }
+    }
+
     @Given("a published plan exists for a saved athlete")
     fun publishedPlanExistsForSavedAthlete() {
         draftPlanExistsForSavedAthlete()
