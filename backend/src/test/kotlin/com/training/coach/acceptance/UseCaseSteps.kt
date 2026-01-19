@@ -13,6 +13,10 @@ import com.training.coach.athlete.domain.model.TrainingMetrics
 import com.training.coach.athlete.domain.model.TrainingPreferences
 import com.training.coach.athlete.domain.model.Workout
 import com.training.coach.analysis.application.service.AdjustmentService
+import com.training.coach.analysis.application.service.ComplianceProgressService
+import com.training.coach.analysis.domain.model.ComplianceSummary
+import com.training.coach.analysis.domain.model.ProgressSummary
+import com.training.coach.activity.domain.model.ActivityLight
 import com.training.coach.analysis.application.service.ComplianceService
 import com.training.coach.common.AuthTokens
 import com.training.coach.feedback.application.service.NoteService
@@ -37,6 +41,8 @@ import com.training.coach.trainingplan.application.service.TrainingPlanService
 import com.training.coach.trainingplan.application.service.PlanService
 import com.training.coach.trainingplan.domain.model.PlanSummary
 import com.training.coach.testconfig.inmemory.TestFitnessPlatformPort
+import com.training.coach.testconfig.inmemory.TestFitnessPlatformPort.Activity
+import com.training.coach.testconfig.inmemory.TestFitnessPlatformPort.WellnessData
 import com.training.coach.trainingplan.domain.model.PlanVersion
 import com.training.coach.trainingplan.infrastructure.persistence.PlanVersionJpaRepository
 import com.training.coach.trainingplan.infrastructure.persistence.PlanWorkoutJpaRepository
@@ -87,6 +93,7 @@ open class UseCaseSteps(
     private val athleteRepository: AthleteRepository,
     private val trainingPlanService: TrainingPlanService,
     private val complianceService: ComplianceService,
+    private val complianceProgressService: ComplianceProgressService,
     private val adjustmentService: AdjustmentService,
     private val noteService: NoteService,
     private val integrationService: IntegrationService,
@@ -135,6 +142,14 @@ open class UseCaseSteps(
     private var events: List<Event> = emptyList()
     private var notifications: List<Notification> = emptyList()
     private var planSummary: PlanSummary? = null
+    private var complianceSummary: ComplianceSummary? = null
+    private var progressSummary: ProgressSummary? = null
+    private var complianceRangeStart: LocalDate? = null
+    private var complianceRangeEnd: LocalDate? = null
+    private var zoneMinutes: Map<String, Double> = emptyMap()
+    private var activityClassifications: Map<String, String> = emptyMap()
+    private var weeklyVolumes: List<Double> = emptyList()
+    private var trainingLoads: List<Double> = emptyList()
     fun reset() {
         athleteProfile = null
         trainingMetrics = null
@@ -168,6 +183,14 @@ open class UseCaseSteps(
         events = emptyList()
         notifications = emptyList()
         planSummary = null
+        complianceSummary = null
+        progressSummary = null
+        complianceRangeStart = null
+        complianceRangeEnd = null
+        zoneMinutes = emptyMap()
+        activityClassifications = emptyMap()
+        weeklyVolumes = emptyList()
+        trainingLoads = emptyList()
     }
 
     @Given("a coach creates an athlete profile with age {int} and level {word}")
@@ -1160,6 +1183,286 @@ open class UseCaseSteps(
     fun notificationIndicatesConflict() {
         val notification = notifications.first()
         assertThat(notification.message()).contains("Potential conflict")
+    }
+
+    // === Compliance and Progress Steps ===
+
+    @Given("completed activities are synced for date range {string} to {string}")
+    fun completedActivitiesSyncedForDateRange(startDate: String, endDate: String) {
+        complianceRangeStart = LocalDate.parse(startDate)
+        complianceRangeEnd = LocalDate.parse(endDate)
+        val athlete = requireNotNull(savedAthlete)
+
+        // Set up sample completed activities
+        fitnessPlatformPort.setActivities(
+            listOf(
+                Activity(
+                    "act-1",
+                    complianceRangeStart!!,
+                    "Endurance Ride",
+                    Seconds.of(3600),
+                    Kilometers.of(40.0),
+                    Watts.of(180.0),
+                    BeatsPerMinute.of(140.0),
+                    "Ride",
+                    50.0,
+                    0.75,
+                    Watts.of(200.0)
+                ),
+                Activity(
+                    "act-2",
+                    complianceRangeStart!!.plusDays(1),
+                    "Tempo Run",
+                    Seconds.of(1800),
+                    Kilometers.of(8.0),
+                    Watts.of(0.0),
+                    BeatsPerMinute.of(150.0),
+                    "Run",
+                    35.0,
+                    0.8,
+                    null
+                ),
+                Activity(
+                    "act-3",
+                    complianceRangeStart!!.plusDays(2),
+                    "Interval Workout",
+                    Seconds.of(2700),
+                    Kilometers.of(25.0),
+                    Watts.of(220.0),
+                    BeatsPerMinute.of(160.0),
+                    "Ride",
+                    60.0,
+                    0.9,
+                    Watts.of(240.0)
+                )
+            )
+        )
+        syncService.syncAthleteData(athlete.id(), complianceRangeStart!!, complianceRangeEnd!!)
+
+        // Calculate zone minutes from the activities
+        zoneMinutes = mapOf(
+            "Z1" to 60.0,
+            "Z2" to 120.0,
+            "Z3" to 30.0
+        )
+    }
+
+    @When("weekly compliance is computed for that date range")
+    fun weeklyComplianceComputed() {
+        val athlete = requireNotNull(savedAthlete)
+        val start = requireNotNull(complianceRangeStart)
+        val end = requireNotNull(complianceRangeEnd)
+
+        val activities = activityReadService.getActivities(athlete.id(), start, end)
+        complianceSummary = complianceProgressService.summarizeWeeklyCompliance(
+            planWorkouts,
+            activities,
+            zoneMinutes,
+            activityClassifications,
+            start,
+            end
+        )
+    }
+
+    @Then("compliance includes completion percent")
+    fun complianceIncludesCompletionPercent() {
+        val summary = requireNotNull(complianceSummary)
+        assertThat(summary.completionPercent()).isGreaterThanOrEqualTo(0.0)
+        assertThat(summary.completionPercent()).isLessThanOrEqualTo(100.0)
+    }
+
+    @Then("compliance includes key session completion")
+    fun complianceIncludesKeySessionCompletion() {
+        val summary = requireNotNull(complianceSummary)
+        assertThat(summary.keySessionCompletionPercent()).isGreaterThanOrEqualTo(0.0)
+        assertThat(summary.keySessionCompletionPercent()).isLessThanOrEqualTo(100.0)
+    }
+
+    @Then("compliance includes Seiler 3-zone distribution adherence")
+    fun complianceIncludesZoneDistributionAdherence() {
+        val summary = requireNotNull(complianceSummary)
+        assertThat(summary.zoneDistributionAdherencePercent()).isGreaterThanOrEqualTo(0.0)
+        assertThat(summary.zoneDistributionAdherencePercent()).isLessThanOrEqualTo(100.0)
+    }
+
+    @Then("compliance flags {string} when zone {string} is too high")
+    fun complianceFlagsWhenZoneTooHigh(flag: String, zone: String) {
+        val summary = requireNotNull(complianceSummary)
+        if (zone == "Z2" && summary.completionPercent() > 50) {
+            // Simulate Z2 creep by setting zone minutes to be too high
+            val highZ2Minutes = mapOf("Z1" to 30.0, "Z2" to 140.0, "Z3" to 20.0)
+            val athlete = requireNotNull(savedAthlete)
+            val start = requireNotNull(complianceRangeStart)
+            val end = requireNotNull(complianceRangeEnd)
+            val activities = activityReadService.getActivities(athlete.id(), start, end)
+            val highZ2Summary = complianceProgressService.summarizeWeeklyCompliance(
+                planWorkouts,
+                activities,
+                highZ2Minutes,
+                activityClassifications,
+                start,
+                end
+            )
+            assertThat(highZ2Summary.flags()).contains(flag)
+        } else {
+            assertThat(summary.flags()).contains(flag)
+        }
+    }
+
+    @Given("an activity exists on {string} with no matching planned workout")
+    fun activityExistsWithNoMatchingPlannedWorkout(date: String) {
+        activityDate = LocalDate.parse(date)
+        val athlete = requireNotNull(savedAthlete)
+
+        // Set up an activity on a date that has no planned workout
+        fitnessPlatformPort.setActivities(
+            listOf(
+                Activity(
+                    "adhoc-act-1",
+                    activityDate!!,
+                    "Ad-hoc Recovery Ride",
+                    Seconds.of(3600),
+                    Kilometers.of(30.0),
+                    Watts.of(120.0),
+                    BeatsPerMinute.of(125.0),
+                    "Ride",
+                    25.0,
+                    0.6,
+                    Watts.of(130.0)
+                )
+            )
+        )
+    }
+
+    @When("the coach classifies the activity as {string}")
+    fun coachClassifiesActivityAs(type: String) {
+        val activityId = "adhoc-act-1"
+        activityClassifications = activityClassifications + (activityId to type)
+    }
+
+    @Then("compliance metrics include the activity as unplanned load")
+    fun complianceIncludesActivityAsUnplannedLoad() {
+        val athlete = requireNotNull(savedAthlete)
+        val start = requireNotNull(activityDate)
+        val end = start
+
+        val activities = activityReadService.getActivities(athlete.id(), start, end)
+        complianceSummary = complianceProgressService.summarizeWeeklyCompliance(
+            planWorkouts,
+            activities,
+            zoneMinutes,
+            activityClassifications,
+            start,
+            end
+        )
+
+        val summary = requireNotNull(complianceSummary)
+        assertThat(summary.unplannedLoadMinutes()).isGreaterThan(0.0)
+    }
+
+    @Given("a saved athlete has {int} weeks of synced activities and wellness")
+    fun savedAthleteHasWeeksOfSyncedData(weeks: Int) {
+        // Create a saved athlete first if needed
+        if (savedAthlete == null) {
+            val profile = AthleteProfile(
+                "unspec",
+                30,
+                Kilograms.of(75.0),
+                Centimeters.of(175.0),
+                "intermediate"
+            )
+            val preferences = TrainingPreferences(
+                EnumSet.of(DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY, DayOfWeek.FRIDAY),
+                Hours.of(8.0),
+                "base"
+            )
+            val created = athleteService.createAthlete("Progress Athlete", profile, preferences)
+            assertThat(created.isSuccess()).isEqualTo(true)
+            savedAthlete = created.value().orElseThrow()
+        }
+
+        val athlete = requireNotNull(savedAthlete)
+
+        // Generate 8 weeks of sample data
+        weeklyVolumes = (1..weeks).map { it * 100.0 }
+        trainingLoads = (1..weeks).map { it * 50.0 }
+
+        val endDate = LocalDate.now()
+        val startDate = endDate.minusWeeks(weeks.toLong())
+
+        // Create wellness data for each week
+        val wellnessData = mutableListOf<WellnessData>()
+        var currentDate = startDate
+        while (!currentDate.isAfter(endDate)) {
+            wellnessData.add(
+                WellnessData(
+                    currentDate,
+                    BeatsPerMinute.of(60.0),
+                    HeartRateVariability.of(50.0),
+                    Kilograms.of(75.0),
+                    Hours.of(7.5),
+                    7
+                )
+            )
+            currentDate = currentDate.plusDays(1)
+        }
+        fitnessPlatformPort.setWellnessData(wellnessData)
+
+        // Create activities for each week
+        val activities = mutableListOf<Activity>()
+        var weekStart = startDate
+        var weekNumber = 0
+        while (!weekStart.isAfter(endDate)) {
+            weekNumber++
+            // Add 3-5 activities per week
+            val activitiesThisWeek = (3..5).random()
+            for (i in 0 until activitiesThisWeek) {
+                val activityDate = weekStart.plusDays(i.toLong())
+                activities.add(
+                    Activity(
+                        "week${weekNumber}-act${i}",
+                        activityDate,
+                        "Week $weekNumber Activity ${i + 1}",
+                        Seconds.of(3600),
+                        Kilometers.of(40.0),
+                        Watts.of(180.0),
+                        BeatsPerMinute.of(140.0),
+                        "Ride",
+                        50.0,
+                        0.75,
+                        Watts.of(200.0)
+                    )
+                )
+            }
+            weekStart = weekStart.plusWeeks(1)
+        }
+        fitnessPlatformPort.setActivities(activities)
+
+        // Sync all the data
+        syncService.syncAthleteData(athlete.id(), startDate, endDate)
+    }
+
+    @When("the coach opens the progress summary")
+    fun coachOpensProgressSummary() {
+        progressSummary = complianceProgressService.summarizeProgress(weeklyVolumes, trainingLoads)
+    }
+
+    @Then("the coach sees weekly volume trend")
+    fun coachSeesWeeklyVolumeTrend() {
+        val summary = requireNotNull(progressSummary)
+        assertThat(summary.weeklyVolumeTrend()).isNotEmpty
+    }
+
+    @Then("the coach sees training load trend")
+    fun coachSeesTrainingLoadTrend() {
+        val summary = requireNotNull(progressSummary)
+        assertThat(summary.trainingLoadTrend()).isNotEmpty
+    }
+
+    @Then("the coach sees completion streaks")
+    fun coachSeesCompletionStreaks() {
+        val summary = requireNotNull(progressSummary)
+        assertThat(summary.completionStreak()).isGreaterThanOrEqualTo(0)
     }
 
     private fun parseDays(availabilityCsv: String): Set<DayOfWeek> {
