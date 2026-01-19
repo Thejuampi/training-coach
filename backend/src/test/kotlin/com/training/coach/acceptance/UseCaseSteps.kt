@@ -1114,6 +1114,65 @@ open class UseCaseSteps(
         planSummary = planService.createPlan(command)
     }
 
+    @Given("a plan draft exists for start date {string} duration weeks {int}")
+    fun draftPlanExistsForStartDate(startDate: String, durationWeeks: Int) {
+        if (savedAthlete == null) {
+            val profile = AthleteProfile("unspec", 30, Kilograms.of(75.0), Centimeters.of(175.0), "intermediate")
+            val preferences = TrainingPreferences(EnumSet.of(DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY, DayOfWeek.FRIDAY), Hours.of(8.0), "base")
+            val created = athleteService.createAthlete("Plan Athlete", profile, preferences)
+            assertThat(created.isSuccess()).isEqualTo(true)
+            savedAthlete = created.value().orElseThrow()
+        }
+        val athlete = requireNotNull(savedAthlete)
+        val command = PlanService.CreatePlanCommand(athlete.id(), "base", LocalDate.parse(startDate), Hours.of(8.0))
+        planSummary = planService.createPlan(command)
+    }
+
+    @When("the coach publishes the plan")
+    fun coachPublishesThePlan() {
+        val plan = requireNotNull(planSummary)
+        planSummary = planService.publishPlan(plan.id())
+    }
+
+    @Then("the athlete can view the published plan")
+    fun athleteCanViewPublishedPlan() {
+        val athlete = requireNotNull(savedAthlete)
+        val plans = planService.getPlansForAthlete(athlete.id())
+        assertThat(plans).isNotEmpty
+        val plan = plans.first()
+        assertThat(plan.status()).isEqualTo(PlanVersionStatus.PUBLISHED)
+    }
+
+    @Then("the plan has a version id and publish timestamp")
+    fun planHasVersionIdAndPublishTimestamp() {
+        val plan = requireNotNull(planSummary)
+        assertThat(plan.id()).isNotBlank
+        assertThat(plan.publishedAt()).isNotNull
+    }
+
+    @When("the coach applies an adjustment to reduce weekly volume by {int} percent")
+    fun coachAppliesAdjustmentToReduceVolume(percent: Int) {
+        val plan = requireNotNull(planSummary)
+        val originalHours = 8.0 // hardcoded from draft setup
+        val reductionAmount = originalHours * (percent / 100.0)
+        val newHours = originalHours - reductionAmount
+        val command = PlanService.RevisePlanCommand(plan.id(), Hours.of(newHours))
+        planSummary = planService.revisePlan(command)
+    }
+
+    @Then("a new plan version is created")
+    fun newPlanVersionIsCreated() {
+        val plan = requireNotNull(planSummary)
+        assertThat(plan.currentVersion()).isGreaterThan(1)
+    }
+
+    @Then("the previous plan version remains viewable")
+    fun previousPlanVersionRemainsViewable() {
+        val plan = requireNotNull(planSummary)
+        val version1 = planService.getPlanVersion(plan.id(), 1)
+        assertThat(version1).isNotNull
+    }
+
     @Given("a published plan exists for a saved athlete")
     fun publishedPlanExistsForSavedAthlete() {
         draftPlanExistsForSavedAthlete()

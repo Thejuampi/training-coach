@@ -4,7 +4,6 @@ Feature: Coach workflows
   Background:
     Given a coach user exists
 
-  @wip
   @smoke
   Scenario: UC1 Manage Athlete
     Given a coach creates an athlete profile with age 30 and level intermediate
@@ -35,7 +34,6 @@ Feature: Coach workflows
     Then the plan targets a polarized 3-zone distribution
     And planned training time in zone "Z2" is minimized
 
-  @wip
   Scenario: F6 Plan lifecycle - publish a plan
     Given a saved athlete with availability "MONDAY,WEDNESDAY,FRIDAY" weekly volume 8.0 phase "base"
     And a plan draft exists for start date "2026-01-01" duration weeks 4
@@ -43,7 +41,6 @@ Feature: Coach workflows
     Then the athlete can view the published plan
     And the plan has a version id and publish timestamp
 
-  @wip
   Scenario: F6 Plan lifecycle - revise a plan and keep history
     Given a published plan exists for a saved athlete
     When the coach applies an adjustment to reduce weekly volume by 10 percent
@@ -73,7 +70,6 @@ Feature: Coach workflows
     And the coach sees intensity distribution versus target 80/20
     And the coach sees flags for missed key sessions
 
-  @wip
   @smoke
   Scenario: UC7 Coach Communication
     Given a saved athlete
