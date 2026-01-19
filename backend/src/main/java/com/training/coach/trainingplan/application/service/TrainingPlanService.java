@@ -142,7 +142,7 @@ public class TrainingPlanService {
 
         if (availableDays.size() >= 3) {
             // High intensity on first available day
-            LocalDate date1 = weekStart.with(availableDays.get(0));
+            LocalDate date1 = weekStart.with(TemporalAdjusters.nextOrSame(availableDays.get(0)));
             Minutes hiMinutes = highIntensityHours.times(0.5).toMinutesRounded();
             workouts.add(new Workout(
                     UUID.randomUUID().toString(),
@@ -156,7 +156,7 @@ public class TrainingPlanService {
                             Minutes.of(5),
                             Watts.of(athlete.currentMetrics().ftp().value() * 1.10),
                             BeatsPerMinute.of(170)))));
-            LocalDate date2 = weekStart.with(availableDays.get(1));
+            LocalDate date2 = weekStart.with(TemporalAdjusters.nextOrSame(availableDays.get(1)));
             workouts.add(new Workout(
                     UUID.randomUUID().toString(),
                     date2,
@@ -168,7 +168,7 @@ public class TrainingPlanService {
             // Low intensity on remaining days
             double lowPerDay = lowIntensityHours.value() / (availableDays.size() - 2);
             for (int i = 2; i < availableDays.size(); i++) {
-                LocalDate date = weekStart.with(availableDays.get(i));
+                LocalDate date = weekStart.with(TemporalAdjusters.nextOrSame(availableDays.get(i)));
                 workouts.add(new Workout(
                         UUID.randomUUID().toString(),
                         date,
