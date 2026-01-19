@@ -41,8 +41,8 @@ import com.training.coach.trainingplan.application.service.TrainingPlanService
 import com.training.coach.trainingplan.application.service.PlanService
 import com.training.coach.trainingplan.domain.model.PlanSummary
 import com.training.coach.testconfig.inmemory.TestFitnessPlatformPort
-import com.training.coach.testconfig.inmemory.TestFitnessPlatformPort.Activity
-import com.training.coach.testconfig.inmemory.TestFitnessPlatformPort.WellnessData
+import com.training.coach.athlete.application.port.out.FitnessPlatformPort.Activity
+import com.training.coach.athlete.application.port.out.FitnessPlatformPort.WellnessData
 import com.training.coach.trainingplan.domain.model.PlanVersion
 import com.training.coach.trainingplan.infrastructure.persistence.PlanVersionJpaRepository
 import com.training.coach.trainingplan.infrastructure.persistence.PlanWorkoutJpaRepository
@@ -1332,6 +1332,9 @@ open class UseCaseSteps(
                 )
             )
         )
+
+        // Sync the activity so it's persisted
+        syncService.syncAthleteData(athlete.id(), activityDate!!, activityDate!!)
     }
 
     @When("the coach classifies the activity as {string}")
