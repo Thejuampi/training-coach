@@ -1,6 +1,7 @@
 package com.training.coach.feedback.presentation;
 
 import com.training.coach.feedback.application.service.NoteService;
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,9 +22,25 @@ public class NoteController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/athletes/{athleteId}/date/{date}")
+    public ResponseEntity<Void> addNoteForDate(
+            @PathVariable String athleteId,
+            @PathVariable LocalDate date,
+            @RequestBody NoteRequest request) {
+        noteService.addNoteForDate(athleteId, date, request.note());
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/athletes/{athleteId}")
     public ResponseEntity<List<String>> getNotes(@PathVariable String athleteId) {
         return ResponseEntity.ok(noteService.getNotes(athleteId));
+    }
+
+    @GetMapping("/athletes/{athleteId}/date/{date}")
+    public ResponseEntity<List<String>> getNotesForDate(
+            @PathVariable String athleteId,
+            @PathVariable LocalDate date) {
+        return ResponseEntity.ok(noteService.getNotesForDate(athleteId, date));
     }
 
     public record NoteRequest(String note) {}

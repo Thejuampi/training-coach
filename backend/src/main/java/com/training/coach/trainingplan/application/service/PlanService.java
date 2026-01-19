@@ -74,7 +74,10 @@ public class PlanService {
         }
         // Regenerate with new weekly hours
         Athlete dummy = createDummyAthlete(command.planId());
-        TrainingPreferences newPrefs = new TrainingPreferences(dummy.preferences().availableDays(), command.newWeeklyHours(), dummy.preferences().currentPhase());
+        TrainingPreferences newPrefs = new TrainingPreferences(
+                dummy.preferences().availableDays(),
+                command.newWeeklyHours(),
+                dummy.preferences().currentPhase());
         Athlete updatedDummy = new Athlete(dummy.id(), dummy.name(), dummy.profile(), dummy.currentMetrics(), newPrefs);
         TrainingPlan newPlan = trainingPlanService.generatePlan(
                 updatedDummy, "base", LocalDate.of(2026, 1, 1), command.newWeeklyHours());

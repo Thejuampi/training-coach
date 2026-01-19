@@ -2,5 +2,20 @@
 <configuration>
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
-    <root level="OFF"/>
+    <!-- Console appender for test output -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Enable scenario listener logging -->
+    <logger name="com.training.coach.acceptance.ScenarioNameListener" level="INFO"/>
+
+    <!-- Cucumber logging -->
+    <logger name="cucumber" level="INFO"/>
+
+    <root level="OFF">
+        <appender-ref ref="CONSOLE"/>
+    </root>
 </configuration>

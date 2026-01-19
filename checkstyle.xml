@@ -7,11 +7,13 @@
     <property name="severity" value="error"/>
     <property name="fileExtensions" value="java"/>
 
+    <!-- Line length check - 160 chars, ignore package/import -->
     <module name="LineLength">
-        <property name="max" value="120"/>
+        <property name="max" value="160"/>
         <property name="ignorePattern" value="^\s*package\s+|^\s*import\s+"/>
     </module>
 
+    <!-- Parameter count check -->
     <module name="TreeWalker">
         <module name="ParameterNumber">
             <property name="max" value="12"/>

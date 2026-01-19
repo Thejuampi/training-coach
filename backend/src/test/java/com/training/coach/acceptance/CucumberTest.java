@@ -13,4 +13,5 @@ import org.junit.platform.suite.api.ConfigurationParameter;
 @SelectClasspathResource("features/coach.feature")
 @ConfigurationParameter(key = "cucumber.glue", value = "com.training.coach.acceptance")
 @ConfigurationParameter(key = "cucumber.filter.tags", value = "not @wip")
+@ConfigurationParameter(key = "cucumber.plugin", value = "com.training.coach.acceptance.ScenarioNameListener")
 public class CucumberTest {}
