@@ -38,6 +38,7 @@ Docs:
 - **tech-lead**:
 -  - Converts validated use cases/scenarios into technical design + **dev-ready tickets**.
 -  - Prefer delegation: spawn developer agents for implementation work unless the user explicitly asks the tech lead to implement a task itself; document any deviation as an assumption.
+-  - Ensure every ticket consolidates the full analysis/conclusions (why this approach, why the chosen files) and lists the exact files/sections plus the concrete changes the delegate should make so the implementer can jump straight into those files with no extra inference.
 
 - **team-lead**:
   - Coordinates PO/TL/Devs; must spawn developer agents when tickets are ready.
