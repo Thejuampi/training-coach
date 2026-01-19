@@ -3,9 +3,11 @@ package com.training.coach.user.infrastructure.persistence;
 import com.training.coach.user.application.port.out.UserCredentialsRepository;
 import com.training.coach.user.infrastructure.persistence.entity.UserCredentialsEntity;
 import java.util.Optional;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Component
+@Profile("!test")
 public class UserCredentialsRepositoryAdapter implements UserCredentialsRepository {
 
     private final UserCredentialsJpaRepository repository;

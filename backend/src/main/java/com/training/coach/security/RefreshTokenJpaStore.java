@@ -3,9 +3,11 @@ package com.training.coach.security;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 @Service
+@Profile("!test")
 public class RefreshTokenJpaStore implements RefreshTokenStore {
 
     private final RefreshTokenRepository repository;

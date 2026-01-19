@@ -9,12 +9,14 @@ import com.training.coach.trainingplan.infrastructure.persistence.entity.Trainin
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 /**
  * JPA adapter for TrainingPlanRepository.
  */
 @Component
+@Profile("!test")
 public class TrainingPlanRepositoryAdapter implements TrainingPlanRepository {
 
     private final TrainingPlanJpaRepository trainingPlanJpaRepository;

@@ -5,9 +5,11 @@ import com.training.coach.user.domain.model.SystemUser;
 import com.training.coach.user.domain.model.UserPreferences;
 import com.training.coach.user.infrastructure.persistence.entity.SystemUserEntity;
 import java.util.Optional;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Component
+@Profile("!test")
 public class SystemUserRepositoryAdapter implements SystemUserRepository {
 
     private final SystemUserJpaRepository repository;
@@ -47,6 +49,8 @@ public class SystemUserRepositoryAdapter implements SystemUserRepository {
         entity.setWeightUnit(user.preferences().weightUnit());
         entity.setDistanceUnit(user.preferences().distanceUnit());
         entity.setHeightUnit(user.preferences().heightUnit());
+        entity.setActivityVisibility(user.preferences().activityVisibility());
+        entity.setWellnessDataSharing(user.preferences().wellnessDataSharing());
         return entity;
     }
 
@@ -55,7 +59,9 @@ public class SystemUserRepositoryAdapter implements SystemUserRepository {
                 entity.getMeasurementSystem(),
                 entity.getWeightUnit(),
                 entity.getDistanceUnit(),
-                entity.getHeightUnit());
+                entity.getHeightUnit(),
+                entity.getActivityVisibility(),
+                entity.getWellnessDataSharing());
         return new SystemUser(entity.getId(), entity.getName(), entity.getRole(), preferences);
     }
 }

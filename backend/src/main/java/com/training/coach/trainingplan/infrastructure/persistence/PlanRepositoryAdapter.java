@@ -15,12 +15,14 @@ import com.training.coach.trainingplan.infrastructure.persistence.entity.Trainin
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 /**
  * Adapter for plan repository.
  */
 @Repository
+@Profile("!test")
 public class PlanRepositoryAdapter implements PlanRepository {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();

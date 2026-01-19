@@ -10,8 +10,7 @@ import com.training.coach.user.application.port.out.SystemUserRepository;
 import com.training.coach.user.domain.model.SystemUser;
 import com.training.coach.user.domain.model.UserPreferences;
 import com.training.coach.user.domain.model.UserRole;
-import com.training.coach.user.infrastructure.persistence.UserCredentialsJpaRepository;
-import com.training.coach.user.infrastructure.persistence.entity.UserCredentialsEntity;
+import com.training.coach.user.application.port.out.UserCredentialsRepository;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Base64;
@@ -27,15 +26,13 @@ class AuthServiceTest {
         var jwtProps = JwtProperties.defaults();
         var keyProvider = JwtKeyProvider.forTests();
 
-        var credentialsRepo = org.mockito.Mockito.mock(UserCredentialsJpaRepository.class);
+        var credentialsRepo = org.mockito.Mockito.mock(UserCredentialsRepository.class);
         var userRepo = org.mockito.Mockito.mock(SystemUserRepository.class);
         var refreshRepo = new InMemoryRefreshTokenStore();
 
-        UserCredentialsEntity cred = new UserCredentialsEntity();
-        cred.setUserId("u-1");
-        cred.setUsername("coach_a");
-        cred.setPasswordHash(passwordEncoder.encode("secret"));
-        cred.setEnabled(true);
+        UserCredentialsRepository.CredentialsRecord cred =
+                new UserCredentialsRepository.CredentialsRecord(
+                        "cred-1", "u-1", "coach_a", passwordEncoder.encode("secret"), true);
         when(credentialsRepo.findByUsername("coach_a")).thenReturn(Optional.of(cred));
 
         SystemUser user = new SystemUser("u-1", "Coach A", UserRole.COACH, UserPreferences.metricDefaults());
@@ -56,15 +53,13 @@ class AuthServiceTest {
         var jwtProps = JwtProperties.defaults();
         var keyProvider = JwtKeyProvider.forTests();
 
-        var credentialsRepo = org.mockito.Mockito.mock(UserCredentialsJpaRepository.class);
+        var credentialsRepo = org.mockito.Mockito.mock(UserCredentialsRepository.class);
         var userRepo = org.mockito.Mockito.mock(SystemUserRepository.class);
         var refreshRepo = new InMemoryRefreshTokenStore();
 
-        UserCredentialsEntity cred = new UserCredentialsEntity();
-        cred.setUserId("u-1");
-        cred.setUsername("coach_a");
-        cred.setPasswordHash(passwordEncoder.encode("secret"));
-        cred.setEnabled(true);
+        UserCredentialsRepository.CredentialsRecord cred =
+                new UserCredentialsRepository.CredentialsRecord(
+                        "cred-1", "u-1", "coach_a", passwordEncoder.encode("secret"), true);
         when(credentialsRepo.findByUsername("coach_a")).thenReturn(Optional.of(cred));
 
         AuthService service = new AuthService(
@@ -79,15 +74,13 @@ class AuthServiceTest {
         var passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
         var jwtProps = JwtProperties.defaults();
         var keyProvider = JwtKeyProvider.forTests();
-        var credentialsRepo = org.mockito.Mockito.mock(UserCredentialsJpaRepository.class);
+        var credentialsRepo = org.mockito.Mockito.mock(UserCredentialsRepository.class);
         var userRepo = org.mockito.Mockito.mock(SystemUserRepository.class);
         var refreshRepo = new InMemoryRefreshTokenStore();
 
-        UserCredentialsEntity cred = new UserCredentialsEntity();
-        cred.setUserId("u-1");
-        cred.setUsername("coach_a");
-        cred.setPasswordHash(passwordEncoder.encode("secret"));
-        cred.setEnabled(true);
+        UserCredentialsRepository.CredentialsRecord cred =
+                new UserCredentialsRepository.CredentialsRecord(
+                        "cred-1", "u-1", "coach_a", passwordEncoder.encode("secret"), true);
         when(credentialsRepo.findByUsername("coach_a")).thenReturn(Optional.of(cred));
 
         SystemUser user = new SystemUser("u-1", "Coach A", UserRole.COACH, UserPreferences.metricDefaults());

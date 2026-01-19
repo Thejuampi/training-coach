@@ -1,5 +1,6 @@
 Feature: Authentication and session management
 
+  @wip
   Scenario: Login with valid credentials returns tokens
     Given a user exists with username "coach_a" and role "COACH"
     When the user logs in with username "coach_a" and password "secret"

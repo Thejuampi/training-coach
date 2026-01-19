@@ -9,12 +9,14 @@ import com.training.coach.athlete.infrastructure.persistence.entity.AthleteEntit
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 /**
  * JPA adapter for AthleteRepository.
  */
 @Component
+@Profile("!test")
 public class AthleteRepositoryAdapter implements AthleteRepository {
 
     private final AthleteJpaRepository jpaRepository;

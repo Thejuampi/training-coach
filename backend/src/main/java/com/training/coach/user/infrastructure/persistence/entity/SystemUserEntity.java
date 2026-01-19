@@ -1,10 +1,12 @@
 package com.training.coach.user.infrastructure.persistence.entity;
 
+import com.training.coach.user.domain.model.ActivityVisibility;
 import com.training.coach.user.domain.model.DistanceUnit;
 import com.training.coach.user.domain.model.HeightUnit;
 import com.training.coach.user.domain.model.MeasurementSystem;
 import com.training.coach.user.domain.model.UserRole;
 import com.training.coach.user.domain.model.WeightUnit;
+import com.training.coach.user.domain.model.WellnessDataSharing;
 import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
@@ -39,6 +41,14 @@ public class SystemUserEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "height_unit", nullable = false, length = 20)
     private HeightUnit heightUnit;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "activity_visibility", nullable = false, length = 20)
+    private ActivityVisibility activityVisibility;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "wellness_data_sharing", nullable = false, length = 20)
+    private WellnessDataSharing wellnessDataSharing;
 
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
@@ -116,6 +126,22 @@ public class SystemUserEntity {
 
     public void setHeightUnit(HeightUnit heightUnit) {
         this.heightUnit = heightUnit;
+    }
+
+    public ActivityVisibility getActivityVisibility() {
+        return activityVisibility;
+    }
+
+    public void setActivityVisibility(ActivityVisibility activityVisibility) {
+        this.activityVisibility = activityVisibility;
+    }
+
+    public WellnessDataSharing getWellnessDataSharing() {
+        return wellnessDataSharing;
+    }
+
+    public void setWellnessDataSharing(WellnessDataSharing wellnessDataSharing) {
+        this.wellnessDataSharing = wellnessDataSharing;
     }
 
     public Instant getCreatedAt() {

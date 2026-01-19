@@ -1,14 +1,19 @@
 package com.training.coach.trainingplan.application.service;
 
+import com.training.coach.athlete.application.port.out.AthleteRepository;
 import com.training.coach.athlete.domain.model.Athlete;
 import com.training.coach.athlete.domain.model.TrainingPlan;
-import com.training.coach.shared.domain.unit.Hours;
+import com.training.coach.athlete.domain.model.TrainingMetrics;
+import com.training.coach.athlete.domain.model.TrainingPreferences;
+import com.training.coach.shared.domain.unit.*;
 import com.training.coach.trainingplan.application.port.out.PlanRepository;
 import com.training.coach.trainingplan.domain.model.PlanSummary;
 import com.training.coach.trainingplan.domain.model.PlanVersion;
 import com.training.coach.trainingplan.infrastructure.persistence.entity.PlanVersionStatus;
+import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -21,19 +26,21 @@ public class PlanService {
 
     private final PlanRepository planRepository;
     private final TrainingPlanService trainingPlanService;
+    private final AthleteRepository athleteRepository;
 
-    public PlanService(PlanRepository planRepository, TrainingPlanService trainingPlanService) {
+    public PlanService(PlanRepository planRepository, TrainingPlanService trainingPlanService, AthleteRepository athleteRepository) {
         this.planRepository = planRepository;
         this.trainingPlanService = trainingPlanService;
+        this.athleteRepository = athleteRepository;
     }
 
     public PlanSummary createPlan(CreatePlanCommand command) {
-        // For MVP, assume athlete is fetched by ID; here we create a dummy or assume provided
-        // In real impl, inject AthleteRepository and fetch by command.athleteId
-        Athlete dummyAthlete = createDummyAthlete(command.athleteId()); // Placeholder
+        Athlete athlete = athleteRepository
+                .findById(command.athleteId())
+                .orElseThrow(() -> new IllegalArgumentException("Athlete not found"));
 
         TrainingPlan generatedPlan = trainingPlanService.generatePlan(
-                dummyAthlete, command.phase(), command.startDate(), command.targetWeeklyHours());
+                athlete, command.phase(), command.startDate(), command.targetWeeklyHours());
 
         String planId = UUID.randomUUID().toString();
         PlanSummary planSummary =
@@ -53,21 +60,26 @@ public class PlanService {
             throw new IllegalStateException("Only draft plans can be published");
         }
         planRepository.updateVersionStatus(planId, plan.currentVersion(), PlanVersionStatus.PUBLISHED);
-        return new PlanSummary(
+        PlanSummary updated = new PlanSummary(
                 plan.id(), plan.athleteId(), plan.currentVersion(), PlanVersionStatus.PUBLISHED, plan.createdAt());
+        planRepository.save(updated);
+        return updated;
     }
 
-    public PlanSummary revisePlan(String planId) {
+    public PlanSummary revisePlan(RevisePlanCommand command) {
         PlanSummary plan =
-                planRepository.findById(planId).orElseThrow(() -> new IllegalArgumentException("Plan not found"));
+                planRepository.findById(command.planId()).orElseThrow(() -> new IllegalArgumentException("Plan not found"));
         if (plan.status() != PlanVersionStatus.PUBLISHED) {
             throw new IllegalStateException("Only published plans can be revised");
         }
-        PlanVersion latest = planRepository
-                .findVersion(planId, plan.currentVersion())
-                .orElseThrow(() -> new IllegalArgumentException("Latest version not found"));
+        // Regenerate with new weekly hours
+        Athlete dummy = createDummyAthlete(command.planId());
+        TrainingPreferences newPrefs = new TrainingPreferences(dummy.preferences().availableDays(), command.newWeeklyHours(), dummy.preferences().currentPhase());
+        Athlete updatedDummy = new Athlete(dummy.id(), dummy.name(), dummy.profile(), dummy.currentMetrics(), newPrefs);
+        TrainingPlan newPlan = trainingPlanService.generatePlan(
+                updatedDummy, "base", LocalDate.of(2026, 1, 1), command.newWeeklyHours());
         int newVersion = plan.currentVersion() + 1;
-        PlanVersion newVersionObj = PlanVersion.create(planId, newVersion, latest.workouts());
+        PlanVersion newVersionObj = PlanVersion.create(plan.id(), newVersion, newPlan.workouts());
         planRepository.saveVersion(newVersionObj);
         PlanSummary updated =
                 new PlanSummary(plan.id(), plan.athleteId(), newVersion, PlanVersionStatus.DRAFT, plan.createdAt());
@@ -85,11 +97,28 @@ public class PlanService {
                 .orElseThrow(() -> new IllegalArgumentException("Version not found"));
     }
 
+    public PlanSummary archivePlan(String planId) {
+        PlanSummary plan =
+                planRepository.findById(planId).orElseThrow(() -> new IllegalArgumentException("Plan not found"));
+        if (plan.status() != PlanVersionStatus.PUBLISHED) {
+            throw new IllegalStateException("Only published plans can be archived");
+        }
+        planRepository.updateVersionStatus(planId, plan.currentVersion(), PlanVersionStatus.ARCHIVED);
+        PlanSummary updated = new PlanSummary(
+                plan.id(), plan.athleteId(), plan.currentVersion(), PlanVersionStatus.ARCHIVED, plan.createdAt());
+        planRepository.save(updated);
+        return updated;
+    }
+
     // Placeholder for dummy athlete; in real impl, fetch from AthleteRepository
     private Athlete createDummyAthlete(String athleteId) {
         // Dummy implementation; replace with actual fetch
-        return new Athlete(athleteId, "Dummy Athlete", null, null, null);
+        TrainingPreferences preferences = new TrainingPreferences(EnumSet.of(DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY, DayOfWeek.FRIDAY), Hours.of(8.0), "base");
+        TrainingMetrics metrics = new TrainingMetrics(Watts.of(250.0), BeatsPerMinute.of(180.0), Vo2Max.of(45.0), Kilograms.of(75.0));
+        return new Athlete(athleteId, "Dummy Athlete", null, metrics, preferences);
     }
 
     public record CreatePlanCommand(String athleteId, String phase, LocalDate startDate, Hours targetWeeklyHours) {}
+
+    public record RevisePlanCommand(String planId, Hours newWeeklyHours) {}
 }

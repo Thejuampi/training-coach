@@ -3,7 +3,7 @@ package com.training.coach.security;
 import com.training.coach.common.AuthTokens;
 import com.training.coach.user.application.port.out.SystemUserRepository;
 import com.training.coach.user.domain.model.SystemUser;
-import com.training.coach.user.infrastructure.persistence.UserCredentialsJpaRepository;
+import com.training.coach.user.application.port.out.UserCredentialsRepository;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.Instant;
@@ -25,7 +25,7 @@ public class AuthService {
     private final JwtProperties properties;
     private final JwtEncoder encoder;
     private final RefreshTokenStore refreshTokenStore;
-    private final UserCredentialsJpaRepository credentialsRepository;
+    private final UserCredentialsRepository credentialsRepository;
     private final SystemUserRepository userRepository;
 
     public AuthService(
@@ -33,7 +33,7 @@ public class AuthService {
             JwtProperties properties,
             JwtEncoder encoder,
             RefreshTokenStore refreshTokenStore,
-            UserCredentialsJpaRepository credentialsRepository,
+            UserCredentialsRepository credentialsRepository,
             SystemUserRepository userRepository) {
         this.passwordEncoder = passwordEncoder;
         this.properties = properties;
@@ -48,14 +48,14 @@ public class AuthService {
         var credentials = credentialsRepository
                 .findByUsername(username)
                 .orElseThrow(() -> new AuthUnauthorizedException("Invalid credentials"));
-        if (!credentials.isEnabled()) {
+        if (!credentials.enabled()) {
             throw new AuthUnauthorizedException("Invalid credentials");
         }
-        if (!passwordEncoder.matches(password, credentials.getPasswordHash())) {
+        if (!passwordEncoder.matches(password, credentials.passwordHash())) {
             throw new AuthUnauthorizedException("Invalid credentials");
         }
         var user = userRepository
-                .findById(credentials.getUserId())
+                .findById(credentials.userId())
                 .orElseThrow(() -> new AuthUnauthorizedException("Invalid credentials"));
         String accessToken = issueAccessToken(user);
         IssuedRefreshToken refreshToken =

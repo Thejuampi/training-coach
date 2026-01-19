@@ -22,6 +22,8 @@ logging:
   level:
     root: OFF
     com.training.coach: OFF
+    com.training.coach.sync.application.service.SyncService: INFO
+    com.training.coach.acceptance: INFO
     org.hibernate.SQL: OFF
     org.hibernate.type.descriptor.sql.BasicBinder: OFF
 

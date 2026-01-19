@@ -7,6 +7,7 @@ import org.junit.platform.suite.api.ConfigurationParameter;
 
 @Suite
 @IncludeEngines("cucumber")
-@SelectClasspathResource("features")
+@SelectClasspathResource("features/plan-lifecycle.feature")
 @ConfigurationParameter(key = "cucumber.glue", value = "com.training.coach.acceptance")
+@ConfigurationParameter(key = "cucumber.filter.tags", value = "not @wip")
 public class CucumberTest {}

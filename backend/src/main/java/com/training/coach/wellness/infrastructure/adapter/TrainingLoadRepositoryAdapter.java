@@ -4,9 +4,11 @@ import com.training.coach.wellness.application.port.out.TrainingLoadRepository;
 import com.training.coach.wellness.domain.model.TrainingLoadSummary;
 import java.time.LocalDate;
 import java.util.Optional;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Component
+@Profile("!test")
 public class TrainingLoadRepositoryAdapter implements TrainingLoadRepository {
 
     @Override
