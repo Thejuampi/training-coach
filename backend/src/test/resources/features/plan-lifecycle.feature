@@ -15,14 +15,12 @@ Scenario: Publishing a plan makes it visible to athlete
     Then the athlete can view the plan as "published"
     And the plan has a publish timestamp
 
-@wip
 Scenario: Plan revision creates a new version
     Given a published plan exists for a saved athlete
     When the coach revises the plan and reduces weekly hours by 1.0
     Then the plan has a new version
     And previous versions remain accessible
 
-@wip
 Scenario: Archive a plan at end of cycle
     Given a published plan exists that ended on "2026-02-01"
     When the coach archives the plan
