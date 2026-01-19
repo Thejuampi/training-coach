@@ -60,6 +60,9 @@ Docs:
 ## Review workflow
 - After any code change, request formal reviews from both the `code-reviewer` and `cyber-security-expert` agents; include a summary of modifications and test artifacts in each review request.
 
+## Question handling
+- If you need additional information, use the `question` tool to ask the user before moving forward; avoid assuming answers and never seek clarification outside the question tool.
+
 ## Build / test / lint
 
 ### Use the Maven wrapper
