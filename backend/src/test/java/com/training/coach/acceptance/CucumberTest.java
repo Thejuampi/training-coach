@@ -12,6 +12,8 @@ import org.junit.platform.suite.api.ConfigurationParameter;
 @SelectClasspathResource("features/compliance-progress.feature")
 @SelectClasspathResource("features/coach.feature")
 @SelectClasspathResource("features/safety-and-guardrails.feature")
+@SelectClasspathResource("features/seiler-intensity.feature")
+@SelectClasspathResource("features/notifications.feature")
 @ConfigurationParameter(key = "cucumber.glue", value = "com.training.coach.acceptance")
 @ConfigurationParameter(key = "cucumber.filter.tags", value = "not @wip")
 @ConfigurationParameter(key = "cucumber.plugin", value = "com.training.coach.acceptance.ScenarioNameListener")
