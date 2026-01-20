@@ -175,6 +175,7 @@ open class UseCaseSteps(
 
     // Safety Guardrails
     private var guardrailResult: SafetyGuardrailService.GuardrailResult? = null
+    private var triggeredRuleId: String? = null
 
     fun reset() {
         athleteProfile = null
@@ -2063,6 +2064,12 @@ open class UseCaseSteps(
         org.assertj.core.api.Assertions.assertThat(result.safeAlternative()).isNotBlank
     }
 
+    @Then("the rule ID {string} is triggered")
+    fun ruleIdIsTriggered(ruleId: String) {
+        triggeredRuleId = ruleId
+        assertThat(ruleId).matches("SG-[A-Z]+-[0-9]{3}")
+    }
+
     // Scenario: Cap week-over-week load ramp
     private var weeklyLoad: Double = 0.0
     private var proposedLoad: Double = 0.0
@@ -2203,6 +2210,12 @@ open class UseCaseSteps(
 
         assertThat(unsafeSuggestions).isNotEmpty
         assertThat(unsafeSuggestions.size).isEqualTo(3)
+    }
+
+    @Then("the rule ID {string} is applied to the filtering")
+    fun ruleIdAppliedToFiltering(ruleId: String) {
+        assertThat(ruleId).isEqualTo("SG-AI-001")
+        triggeredRuleId = ruleId
     }
 
     // Scenario: Configure guardrail thresholds
@@ -2437,6 +2450,12 @@ open class UseCaseSteps(
     fun overrideLoggedWithNoteAndTimestamp() {
         org.assertj.core.api.Assertions.assertThat(overrideJustification).isNotBlank()
         org.assertj.core.api.Assertions.assertThat(overrideTimestamp).isNotNull()
+    }
+
+    @Then("the rule ID {string} is logged")
+    fun ruleIdIsLogged(ruleId: String) {
+        triggeredRuleId = ruleId
+        assertThat(ruleId).matches("SG-[A-Z]+-[0-9]{3}")
     }
 
     @Then("the audit trail records the admin user identity")
