@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service for managing athlete events (e.g., competitions, important dates).
+ */
 @Service
 public class EventService {
 
