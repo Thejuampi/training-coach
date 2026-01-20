@@ -2383,17 +2383,13 @@ open class UseCaseSteps(
         val blocked = recoveryDays < 2
         
         if (blocked) {
-            guardrailResult = SafetyGuardrailService.GuardrailResult(
-                true,
+            guardrailResult = SafetyGuardrailService.GuardrailResult.blocked(
+                "SG-RECOVERY-001",
                 "Minimum 2 recovery days required between high-intensity sessions",
                 "Schedule active recovery or zone 1 ride instead"
             )
         } else {
-            guardrailResult = SafetyGuardrailService.GuardrailResult(
-                false,
-                "",
-                ""
-            )
+            guardrailResult = SafetyGuardrailService.GuardrailResult.approved()
         }
     }
 
