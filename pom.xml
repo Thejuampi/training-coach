@@ -34,7 +34,7 @@
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <kotlin.version>2.2.21</kotlin.version>
+        <kotlin.version>2.3.0</kotlin.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <lombok.version>1.18.30</lombok.version>
         <spotbugs.version>4.8.3</spotbugs.version>
@@ -145,9 +145,13 @@
                     <version>3.2.5</version>
                     <configuration>
                         <argLine>@{jacoco.argLine} -XX:+EnableDynamicAgentLoading -Djdk.instrument.traceUsage=false -Xshare:off</argLine>
-                        <forkCount>0.66C</forkCount>
+                        <forkCount>1</forkCount>
                         <reuseForks>true</reuseForks>
                         <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                        <parallel>classes</parallel>
+                        <threadCount>4</threadCount>
+                        <perCoreThreadCount>true</perCoreThreadCount>
+                        <useUnlimitedThreads>false</useUnlimitedThreads>
                         <excludes>
                             <exclude>**/*IT.java</exclude>
                             <exclude>**/*IT.kt</exclude>
