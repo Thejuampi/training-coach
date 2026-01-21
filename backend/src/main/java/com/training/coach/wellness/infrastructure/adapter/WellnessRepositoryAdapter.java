@@ -66,6 +66,12 @@ public class WellnessRepositoryAdapter implements WellnessRepository {
     }
 
     @Override
+    public void deleteByAthleteId(String athleteId) {
+        List<WellnessSnapshotEntity> entities = jpaRepository.findByAthleteIdOrderByDateDesc(athleteId);
+        jpaRepository.deleteAll(entities);
+    }
+
+    @Override
     public boolean existsByAthleteIdAndDate(String athleteId, LocalDate date) {
         return jpaRepository.findByAthleteIdAndDate(athleteId, date) != null;
     }

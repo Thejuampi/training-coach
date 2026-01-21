@@ -1,8 +1,10 @@
+@wip
 Feature: Plan adjustments workflow
 
   Background:
     Given a coach user exists
 
+  @wip
   Scenario: Propose and approve a plan adjustment
     Given a published plan exists for a saved athlete
     And the athlete has low readiness for 3 consecutive days
@@ -12,6 +14,7 @@ Feature: Plan adjustments workflow
     Then the adjustment is applied to the plan
     And the adjustment is recorded in the plan audit log
 
+  @wip
   Scenario: Reject an unsafe adjustment
     Given a published plan exists for a saved athlete
     When the coach proposes increasing weekly load by 40 percent

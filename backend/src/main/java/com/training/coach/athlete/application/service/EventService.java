@@ -29,4 +29,19 @@ public class EventService {
     public List<Event> getEvents(String athleteId) {
         return repository.findByAthleteId(athleteId);
     }
+
+    public Result<Event> updateEventDate(String eventId, LocalDate newDate) {
+        return repository.findById(eventId)
+            .map(existing -> {
+                Event updated = new Event(
+                    existing.id(),
+                    existing.athleteId(),
+                    existing.name(),
+                    newDate,
+                    existing.priority()
+                );
+                return Result.success(repository.save(updated));
+            })
+            .orElse(Result.failure(new RuntimeException("Event not found")));
+    }
 }

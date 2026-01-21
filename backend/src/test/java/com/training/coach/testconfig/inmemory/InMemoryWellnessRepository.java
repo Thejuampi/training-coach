@@ -56,6 +56,11 @@ public class InMemoryWellnessRepository implements WellnessRepository {
     }
 
     @Override
+    public void deleteByAthleteId(String athleteId) {
+        byAthlete.remove(athleteId);
+    }
+
+    @Override
     public boolean existsByAthleteIdAndDate(String athleteId, LocalDate date) {
         return byAthlete.getOrDefault(athleteId, List.of()).stream().anyMatch(snapshot -> snapshot.date().equals(date));
     }

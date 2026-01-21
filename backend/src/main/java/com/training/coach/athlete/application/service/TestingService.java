@@ -15,9 +15,10 @@ import org.springframework.stereotype.Service;
 public class TestingService {
 
     private final Map<String, List<ScheduledTest>> scheduledTests = new HashMap<>();
+    private final Map<String, Double> ftpResults = new HashMap<>();
 
     /**
-     * Schedule an FTP ramp test for an athlete on a specific date.
+     * Schedule an FTP ramp on a specific date test for an athlete.
      */
     public void scheduleFtpTest(String athleteId, LocalDate date) {
         scheduledTests.computeIfAbsent(athleteId, k -> new ArrayList<>())
@@ -70,6 +71,34 @@ public class TestingService {
                 4. Your VO2 max will be estimated from the power/heart rate data
                 """;
         };
+    }
+
+    /**
+     * Record the result of an FTP test and update athlete metrics.
+     * Returns the new FTP value.
+     */
+    public double recordFtpTestResult(String athleteId, LocalDate testDate, double ftpResult) {
+        // Store the actual FTP result
+        ftpResults.put(athleteId + "_" + testDate.toString(), ftpResult);
+        
+        // Update the scheduled test status
+        scheduledTests.computeIfAbsent(athleteId, k -> new ArrayList<>())
+            .removeIf(t -> t.date().equals(testDate) && t.type() == TestType.FTP_RAMP);
+        scheduledTests.get(athleteId).add(new ScheduledTest(testDate, TestType.FTP_RAMP, TestStatus.COMPLETED));
+        
+        return ftpResult;
+    }
+
+    /**
+     * Get the latest FTP result for an athlete.
+     */
+    public Double getLatestFtpResult(String athleteId) {
+        return scheduledTests.getOrDefault(athleteId, List.of())
+            .stream()
+            .filter(t -> t.type() == TestType.FTP_RAMP && t.status() == TestStatus.COMPLETED)
+            .max(java.util.Comparator.comparing(ScheduledTest::date))
+            .map(t -> ftpResults.get(athleteId + "_" + t.date().toString()))
+            .orElse(null);
     }
 
     public record ScheduledTest(

@@ -90,4 +90,67 @@ public class ExportService {
                 athleteName.replace(" ", "_"),
                 weekStart.format(DateTimeFormatter.ofPattern("yyyyMMdd")));
     }
+
+    /**
+     * Export weekly report as JSON.
+     */
+    public byte[] exportWeeklyReportAsJson(
+            String athleteName,
+            LocalDate weekStart,
+            LocalDate weekEnd,
+            ComplianceSummary compliance,
+            Map<LocalDate, Double> readinessTrends,
+            List<String> completedActivities) throws IOException {
+
+        StringBuilder json = new StringBuilder();
+        json.append("{\n");
+        json.append("  \"report\": {\n");
+        json.append("    \"type\": \"weekly\",\n");
+        json.append("    \"athlete\": \"").append(athleteName).append("\",\n");
+        json.append("    \"period\": {\n");
+        json.append("      \"start\": \"").append(weekStart).append("\",\n");
+        json.append("      \"end\": \"").append(weekEnd).append("\"\n");
+        json.append("    },\n");
+        
+        // Compliance section
+        json.append("    \"compliance\": {\n");
+        json.append("      \"completionRate\": ").append(String.format("%.2f", compliance.completionPercent())).append(",\n");
+        json.append("      \"keySessionCompletion\": ").append(String.format("%.2f", compliance.keySessionCompletionPercent())).append(",\n");
+        json.append("      \"zoneDistributionAdherence\": ").append(String.format("%.2f", compliance.zoneDistributionAdherencePercent())).append(",\n");
+        json.append("      \"unplannedLoadMinutes\": ").append(compliance.unplannedLoadMinutes()).append(",\n");
+        json.append("      \"flags\": [");
+        if (!compliance.flags().isEmpty()) {
+            for (int i = 0; i < compliance.flags().size(); i++) {
+                json.append("\"").append(compliance.flags().get(i)).append("\"");
+                if (i < compliance.flags().size() - 1) json.append(",");
+            }
+        }
+        json.append("]\n");
+        json.append("  },\n");
+        
+        // Readiness trends
+        json.append("  \"readinessTrends\": {");
+        int trendCount = 0;
+        for (Map.Entry<LocalDate, Double> entry : readinessTrends.entrySet()) {
+            if (trendCount > 0) json.append(",");
+            json.append("\"").append(entry.getKey()).append("\": ").append(String.format("%.2f", entry.getValue()));
+            trendCount++;
+        }
+        json.append("},\n");
+        
+        // Completed activities
+        json.append("  \"completedActivities\": [");
+        if (!completedActivities.isEmpty()) {
+            for (int i = 0; i < completedActivities.size(); i++) {
+                json.append("\"").append(completedActivities.get(i).replace("\"", "\\\"")).append("\"");
+                if (i < completedActivities.size() - 1) json.append(",");
+            }
+        }
+        json.append("]\n");
+        
+        json.append("  }\n");
+        json.append("}\n");
+        
+        return json.toString().getBytes();
+    }
 }

@@ -215,3 +215,43 @@ TUI profile `openapi-client` generates a WebClient client from `api/openapi.json
 ## Copilot/Cursor rules
 - Copilot instructions live in `.github/copilot-instructions.md` and are included above.
 - No Cursor rules (`.cursor/rules/` or `.cursorrules`) were found in this repo at time of writing.
+
+## Feature File Modification Policy
+
+### Before Modifying Feature Files
+- **DO NOT delete or truncate scenarios** from `.feature` files without consulting stakeholders.
+- Use the `product-owner`, `user-coach`, and `user-athlete` agents to validate changes.
+- Document all modifications and rationale in the PR description.
+
+### Consultation Process for Feature Changes
+When scenarios need to be modified (removed, deprecated, or significantly changed):
+
+1. **Call the Task tool** with:
+   - `product-owner`: Validate product intent and business value
+   - `user-coach`: Validate coach-facing workflows and usability
+   - `user-athlete`: Validate athlete-facing workflows and data privacy
+
+2. **Key questions to address**:
+   - Does the scenario represent validated product intent?
+   - Are there alternative implementations that preserve the behavior?
+   - What is the impact on test coverage?
+
+3. **Documentation**:
+   - Record consultation findings in PR description
+   - Update AGENTS.md with lessons learned if process changes
+
+### Recent Consultation (2026-01-20)
+**Issue**: While adding `@wip` tags to mark unimplemented scenarios, some scenario step definitions were accidentally truncated in:
+- `admin.feature`, `athlete.feature`, `workout-library.feature`, and others
+
+**Resolution**: Restored original files from git and re-applied `@wip` tags correctly.
+
+**Stakeholder Guidance**:
+- **Product Owner**: Restore from git; original scenarios represent validated product intent. Don't redesign or simplify without cause.
+- **User Coach**: Privacy, availability conflict notifications, and goal race scenarios are high priority for coach workflows.
+- **User Athlete**: Privacy controls (activity visibility, wellness sharing) and availability changes are high priority for athlete experience.
+
+### Using @wip Tags
+- Add `@wip` tag to mark scenarios as work-in-progress, NOT remove or truncate content
+- The CucumberTest filter (`not @wip`) ensures skipped scenarios don't fail the build
+- Implemented scenarios should have their `@wip` tags removed as they are completed

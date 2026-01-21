@@ -5,11 +5,13 @@ import com.training.coach.athlete.domain.model.Athlete;
 import com.training.coach.athlete.domain.model.AthleteProfile;
 import com.training.coach.athlete.domain.model.TrainingMetrics;
 import com.training.coach.athlete.domain.model.TrainingPreferences;
+import com.training.coach.feedback.application.service.NoteService;
 import com.training.coach.shared.domain.unit.BeatsPerMinute;
 import com.training.coach.shared.domain.unit.Vo2Max;
 import com.training.coach.shared.domain.unit.Watts;
 import com.training.coach.shared.exception.AthleteNotFoundException;
 import com.training.coach.shared.functional.Result;
+import com.training.coach.wellness.application.port.out.WellnessRepository;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 
@@ -20,9 +22,13 @@ import org.springframework.stereotype.Service;
 public class AthleteService {
 
     private final AthleteRepository athleteRepository;
+    private final WellnessRepository wellnessRepository;
+    private final NoteService noteService;
 
-    public AthleteService(AthleteRepository athleteRepository) {
+    public AthleteService(AthleteRepository athleteRepository, WellnessRepository wellnessRepository, NoteService noteService) {
         this.athleteRepository = athleteRepository;
+        this.wellnessRepository = wellnessRepository;
+        this.noteService = noteService;
     }
 
     public Result<Athlete> createAthlete(String name, AthleteProfile profile, TrainingPreferences preferences) {
@@ -56,6 +62,11 @@ public class AthleteService {
     }
 
     public Result<Void> deleteAthlete(String id) {
+        // Delete associated data first
+        wellnessRepository.deleteByAthleteId(id);
+        noteService.deleteNotesForAthlete(id);
+        
+        // Then delete the athlete
         athleteRepository.deleteById(id);
         return Result.success(null);
     }

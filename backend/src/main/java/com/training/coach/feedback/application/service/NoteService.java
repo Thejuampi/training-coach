@@ -38,4 +38,9 @@ public class NoteService {
     public Map<LocalDate, List<String>> getAllNotesForAthlete(String athleteId) {
         return dateLinkedNotes.getOrDefault(athleteId, Map.of());
     }
+
+    public void deleteNotesForAthlete(String athleteId) {
+        notes.remove(athleteId);
+        dateLinkedNotes.remove(athleteId);
+    }
 }

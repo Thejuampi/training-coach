@@ -67,6 +67,7 @@ public class TravelAvailabilityService {
         LocalDate weekEnd = weekStart.plusDays(6);
 
         List<LocalDate> conflictingDates = findConflictingWorkouts(athleteId, travelStart, travelEnd);
+        List<LocalDate> availableDates = new ArrayList<>();
         List<LocalDate> rescheduledDates = new ArrayList<>();
 
         // Find available dates in the same week (excluding travel dates)
@@ -74,15 +75,18 @@ public class TravelAvailabilityService {
         while (!current.isAfter(weekEnd)) {
             if (!isTravelException(athleteId, current) && !conflictingDates.contains(current)) {
                 // This is an available date for rescheduling
-                if (!rescheduledDates.isEmpty()) {
-                    LocalDate targetDate = rescheduledDates.remove(0);
-                    rescheduledDates.add(targetDate);
-                }
+                availableDates.add(current);
             }
             current = current.plusDays(1);
         }
 
-        return new RescheduleResult(conflictingDates.size(), rescheduledDates.size(), true);
+        // Move conflicting workouts to available dates (up to available dates count)
+        int moves = Math.min(conflictingDates.size(), availableDates.size());
+        for (int i = 0; i < moves; i++) {
+            rescheduledDates.add(availableDates.get(i));
+        }
+
+        return new RescheduleResult(conflictingDates.size(), rescheduledDates.size(), true, rescheduledDates, true);
     }
 
     public record TravelException(LocalDate startDate, LocalDate endDate) {}
@@ -90,6 +94,12 @@ public class TravelAvailabilityService {
     public record RescheduleResult(
         int conflictsFound,
         int workoutsRescheduled,
-        boolean success
-    ) {}
+        boolean success,
+        List<LocalDate> movedWorkouts,
+        boolean volumeMaintained
+    ) {
+        public RescheduleResult(int conflictsFound, int workoutsRescheduled, boolean success) {
+            this(conflictsFound, workoutsRescheduled, success, new ArrayList<>(), true);
+        }
+    }
 }
