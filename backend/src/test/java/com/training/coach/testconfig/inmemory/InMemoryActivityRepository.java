@@ -47,4 +47,9 @@ public class InMemoryActivityRepository implements ActivityRepository {
                 .filter(activity -> !activity.date().isBefore(startDate) && !activity.date().isAfter(endDate))
                 .toList();
     }
+
+    @Override
+    public void deleteByAthleteId(String athleteId) {
+        byAthleteId.remove(athleteId);
+    }
 }

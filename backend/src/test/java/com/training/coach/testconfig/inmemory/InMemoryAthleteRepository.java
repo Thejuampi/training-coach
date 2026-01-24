@@ -33,4 +33,9 @@ public class InMemoryAthleteRepository implements AthleteRepository {
     public List<Athlete> findAll() {
         return List.copyOf(athletes.values());
     }
+
+    @Override
+    public void deleteAllAthleteData(String athleteId) {
+        deleteById(athleteId);
+    }
 }

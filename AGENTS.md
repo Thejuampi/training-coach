@@ -195,6 +195,11 @@ TUI profile `openapi-client` generates a WebClient client from `api/openapi.json
 - Functional core can use `com.training.coach.shared.functional.Result` for recoverable failures.
 - API layer uses Spring `ResponseStatusException` for HTTP-mapped errors.
 
+### Commit messages
+- NEVER mention AI, Claude, or any AI assistance in commit messages.
+- Focus on the technical implementation and business value.
+- Example: "feat: Add GDPR-compliant athlete data deletion" instead of "feat: Implement athlete deletion with AI assistance"
+
 ### Logging & security
 - Do not log secrets (API keys, tokens, passwords).
 - Keep logs concise; tests should remain quiet (test profile disables most logging).

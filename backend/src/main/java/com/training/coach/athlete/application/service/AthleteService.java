@@ -24,11 +24,14 @@ public class AthleteService {
     private final AthleteRepository athleteRepository;
     private final WellnessRepository wellnessRepository;
     private final NoteService noteService;
+    private final com.training.coach.activity.application.port.out.ActivityRepository activityRepository;
 
-    public AthleteService(AthleteRepository athleteRepository, WellnessRepository wellnessRepository, NoteService noteService) {
+    public AthleteService(AthleteRepository athleteRepository, WellnessRepository wellnessRepository, NoteService noteService,
+                         com.training.coach.activity.application.port.out.ActivityRepository activityRepository) {
         this.athleteRepository = athleteRepository;
         this.wellnessRepository = wellnessRepository;
         this.noteService = noteService;
+        this.activityRepository = activityRepository;
     }
 
     public Result<Athlete> createAthlete(String name, AthleteProfile profile, TrainingPreferences preferences) {
@@ -63,9 +66,10 @@ public class AthleteService {
 
     public Result<Void> deleteAthlete(String id) {
         // Delete associated data first
+        activityRepository.deleteByAthleteId(id);
         wellnessRepository.deleteByAthleteId(id);
         noteService.deleteNotesForAthlete(id);
-        
+
         // Then delete the athlete
         athleteRepository.deleteById(id);
         return Result.success(null);

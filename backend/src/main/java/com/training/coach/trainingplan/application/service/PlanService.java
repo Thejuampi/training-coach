@@ -5,6 +5,7 @@ import com.training.coach.athlete.domain.model.Athlete;
 import com.training.coach.athlete.domain.model.TrainingPlan;
 import com.training.coach.athlete.domain.model.TrainingMetrics;
 import com.training.coach.athlete.domain.model.TrainingPreferences;
+import com.training.coach.athlete.domain.model.Workout;
 import com.training.coach.shared.domain.unit.*;
 import com.training.coach.trainingplan.application.port.out.PlanRepository;
 import com.training.coach.trainingplan.domain.model.PlanSummary;
@@ -104,6 +105,27 @@ public class PlanService {
         return planRepository
                 .findVersion(planId, version)
                 .orElseThrow(() -> new IllegalArgumentException("Version not found"));
+    }
+
+    /**
+     * Get workout for a specific date from the published plan.
+     */
+    public Workout getWorkoutForDate(String athleteId, LocalDate date) {
+        // Get published plans for the athlete
+        var plans = getPlansForAthlete(athleteId);
+        if (plans.isEmpty()) {
+            return null;
+        }
+
+        // Get the latest published plan
+        var latestPlan = plans.get(0);
+        var planVersion = getPlanVersion(latestPlan.id(), latestPlan.currentVersion());
+
+        // Find workout for the requested date
+        return planVersion.workouts().stream()
+                .filter(workout -> workout.date().equals(date))
+                .findFirst()
+                .orElse(null);
     }
 
     public PlanSummary archivePlan(String planId) {

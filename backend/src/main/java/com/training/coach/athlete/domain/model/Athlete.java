@@ -12,6 +12,10 @@ public record Athlete(
         return new Athlete(id, name, profile, newMetrics, preferences);
     }
 
+    public Athlete withPreferences(TrainingPreferences newPreferences) {
+        return new Athlete(id, name, profile, currentMetrics, newPreferences);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

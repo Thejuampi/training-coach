@@ -47,6 +47,13 @@ public class AthleteRepositoryAdapter implements AthleteRepository {
         return jpaRepository.findAll().stream().map(this::toDomain).collect(java.util.stream.Collectors.toList());
     }
 
+    @Override
+    public void deleteAllAthleteData(String athleteId) {
+        // First delete the athlete
+        deleteById(athleteId);
+        // Additional data deletion would be handled by other repositories through the AthleteService
+    }
+
     private AthleteEntity toEntity(Athlete athlete) {
         AthleteEntity entity = new AthleteEntity();
         entity.setId(athlete.id());

@@ -1,7 +1,13 @@
 package com.training.coach.athlete.presentation;
 
 import com.training.coach.athlete.application.service.AthleteService;
+import com.training.coach.athlete.application.service.EventService;
 import com.training.coach.athlete.domain.model.Athlete;
+import com.training.coach.athlete.domain.model.Event;
+import com.training.coach.athlete.domain.model.Workout;
+import com.training.coach.athlete.domain.model.UserPreferences;
+import com.training.coach.trainingplan.application.service.PlanService;
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,9 +18,13 @@ import org.springframework.web.bind.annotation.*;
 public class AthleteController {
 
     private final AthleteService athleteService;
+    private final PlanService planService;
+    private final EventService eventService;
 
-    public AthleteController(AthleteService athleteService) {
+    public AthleteController(AthleteService athleteService, PlanService planService, EventService eventService) {
         this.athleteService = athleteService;
+        this.planService = planService;
+        this.eventService = eventService;
     }
 
     @PostMapping
@@ -61,4 +71,65 @@ public class AthleteController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
+
+    /**
+     * View today's workout.
+     */
+    @GetMapping("/{id}/workout/today")
+    public ResponseEntity<DailyWorkoutResponse> getTodayWorkout(@PathVariable String id) {
+        LocalDate today = LocalDate.now();
+        var workout = planService.getWorkoutForDate(id, today);
+
+        if (workout == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        var response = new DailyWorkoutResponse(
+                workout.type(),
+                workout.durationMinutes(),
+                workout.intensityProfile()
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Update measurement units and privacy settings.
+     */
+    @PutMapping("/{id}/preferences")
+    public ResponseEntity<Athlete> updatePreferences(@PathVariable String id, @RequestBody UserPreferences preferences) {
+        var result = athleteService.updateAthlete(id,
+                new Athlete(id, null, null, null, preferences));
+
+        if (result.isSuccess()) {
+            return ResponseEntity.ok(result.value().get());
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
+    /**
+     * Add a goal event.
+     */
+    @PostMapping("/{id}/events")
+    public ResponseEntity<Event> addGoalEvent(@PathVariable String id, @RequestBody CreateEventRequest request) {
+        var event = new Event(
+                java.util.UUID.randomUUID().toString(),
+                id,
+                request.name(),
+                LocalDate.parse(request.date()),
+                request.priority()
+        );
+
+        // In a real implementation, this would save to a repository
+        return ResponseEntity.status(HttpStatus.CREATED).body(event);
+    }
+
+    // Request/Response DTOs
+    public record DailyWorkoutResponse(
+            Workout.WorkoutType type,
+            com.training.coach.shared.domain.unit.Minutes duration,
+            Workout.IntensityProfile intensityProfile) {}
+
+    public record CreateEventRequest(String name, String date, String priority) {}
 }

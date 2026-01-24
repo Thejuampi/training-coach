@@ -25,6 +25,18 @@ public class NotificationService {
         repository.save(notification);
     }
 
+    public void notifyAthlete(String athleteId, String message) {
+        String id = UUID.randomUUID().toString();
+        Notification notification = new Notification(id, athleteId, message, LocalDateTime.now());
+        repository.save(notification);
+    }
+
+    public void notifyAdmin(String message) {
+        String id = UUID.randomUUID().toString();
+        Notification notification = new Notification(id, "system", message, LocalDateTime.now());
+        repository.save(notification);
+    }
+
     public List<Notification> getNotifications(String athleteId) {
         return repository.findByAthleteId(athleteId);
     }

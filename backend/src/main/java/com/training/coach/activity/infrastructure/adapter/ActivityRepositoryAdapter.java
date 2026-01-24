@@ -60,6 +60,11 @@ public class ActivityRepositoryAdapter implements ActivityRepository {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public void deleteByAthleteId(String athleteId) {
+        jpaRepository.deleteByAthleteId(athleteId);
+    }
+
     private ActivityLightEntity toEntity(ActivityLight activity) {
         ActivityLightEntity entity = new ActivityLightEntity();
         entity.setId(activity.id());

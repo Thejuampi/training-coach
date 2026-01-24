@@ -22,4 +22,6 @@ public interface ActivityJpaRepository extends JpaRepository<ActivityLightEntity
             @Param("athleteId") String athleteId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
+
+    void deleteByAthleteId(String athleteId);
 }

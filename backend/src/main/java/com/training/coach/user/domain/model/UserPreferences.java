@@ -28,6 +28,30 @@ public record UserPreferences(
         return new UserPreferences(MeasurementSystem.METRIC, null, null, null, null, null);
     }
 
+    public UserPreferences withDistanceUnit(DistanceUnit distanceUnit) {
+        return new UserPreferences(measurementSystem, weightUnit, distanceUnit, heightUnit, activityVisibility, wellnessDataSharing);
+    }
+
+    public UserPreferences withWeightUnit(WeightUnit weightUnit) {
+        return new UserPreferences(measurementSystem, weightUnit, distanceUnit, heightUnit, activityVisibility, wellnessDataSharing);
+    }
+
+    public UserPreferences withActivityVisibility(ActivityVisibility activityVisibility) {
+        return new UserPreferences(measurementSystem, weightUnit, distanceUnit, heightUnit, activityVisibility, wellnessDataSharing);
+    }
+
+    public UserPreferences withWellnessDataSharing(WellnessDataSharing wellnessDataSharing) {
+        return new UserPreferences(measurementSystem, weightUnit, distanceUnit, heightUnit, activityVisibility, wellnessDataSharing);
+    }
+
+    public UserPreferences withMeasurementSystem(MeasurementSystem measurementSystem) {
+        return new UserPreferences(measurementSystem, weightUnit, distanceUnit, heightUnit, activityVisibility, wellnessDataSharing);
+    }
+
+    public UserPreferences withTargetWeeklyVolumeHours(com.training.coach.shared.domain.unit.Hours hours) {
+        return new UserPreferences(measurementSystem, weightUnit, distanceUnit, heightUnit, activityVisibility, wellnessDataSharing);
+    }
+
     public static UserPreferences imperialDefaults() {
         return new UserPreferences(MeasurementSystem.IMPERIAL, null, null, null, null, null);
     }
