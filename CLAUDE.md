@@ -153,6 +153,23 @@ backend/src/main/java/com/training/coach/
 - In-memory repositories for test isolation
 - No external IO - all ports run in-memory
 
+### Assertion Rules
+- **Single Assertion**: Each test method must have exactly one assertion.
+- **Chain Assertions**: If multiple assertions are needed, use chain of AssertJ calls with meaningful descriptions:
+  ```java
+  assertThat(list).as("Workout list should contain expected activities")
+      .hasSize(4)
+      .contains(A, B, C, D);
+  ```
+- **Soft Assertions**: If chaining is not sufficient, use SoftAssertions:
+  ```java
+  softly.assertThat(list).hasSize(4);
+  softly.assertThat(firstItem).isNotNull();
+  softly.assertThat(secondItem).isNotNull();
+  softly.assertAll();
+  `
+- **Rationale**: Single assertions make debugging easier and clearly document what the test is validating.
+
 ### Domain Constraints
 - **Seiler Polarized Training**: 80/20 distribution enforced
 - **AI Usage**: Advisory only - deterministic rules enforce safety

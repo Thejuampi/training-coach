@@ -1,10 +1,18 @@
 package com.training.coach.athlete.application.service;
 
+import com.training.coach.athlete.application.port.out.AthleteRepository;
+import com.training.coach.athlete.application.port.out.TestResultRepository;
+import com.training.coach.athlete.domain.model.FtpTestResult;
+import com.training.coach.athlete.domain.model.TrainingMetrics;
+import com.training.coach.shared.domain.unit.Watts;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
@@ -14,33 +22,78 @@ import org.springframework.stereotype.Service;
 @Service
 public class TestingService {
 
+    private static final Logger logger = LoggerFactory.getLogger(TestingService.class);
+
+    private final AthleteRepository athleteRepository;
+    private final FtpTestService ftpTestService;
+    private final TestResultRepository testResultRepository;
+
     private final Map<String, List<ScheduledTest>> scheduledTests = new HashMap<>();
-    private final Map<String, Double> ftpResults = new HashMap<>();
+
+    public TestingService(
+            AthleteRepository athleteRepository,
+            FtpTestService ftpTestService,
+            TestResultRepository testResultRepository) {
+        this.athleteRepository = athleteRepository;
+        this.ftpTestService = ftpTestService;
+        this.testResultRepository = testResultRepository;
+    }
 
     /**
-     * Schedule an FTP ramp on a specific date test for an athlete.
+     * Schedule an FTP test for an athlete on a specific date.
      */
     public void scheduleFtpTest(String athleteId, LocalDate date) {
+        var athlete = athleteRepository.findById(athleteId)
+                .orElseThrow(() -> new IllegalArgumentException("Athlete not found: " + athleteId));
+
         scheduledTests.computeIfAbsent(athleteId, k -> new ArrayList<>())
-            .add(new ScheduledTest(date, TestType.FTP_RAMP, TestStatus.SCHEDULED));
+                .add(new ScheduledTest(date, TestType.FTP_TEST, TestStatus.SCHEDULED));
+
+        logger.info("Scheduled FTP test for athlete {} on {}", athleteId, date);
     }
 
     /**
-     * Get all scheduled tests for an athlete.
+     * Record FTP test result for an athlete.
+     * This will update the athlete's FTP and recalculate all zones.
      */
-    public List<ScheduledTest> getScheduledTests(String athleteId) {
-        return scheduledTests.getOrDefault(athleteId, List.of());
-    }
+    public FtpTestResult recordFtpTestResult(String athleteId, LocalDate testDate, double ftpValue) {
+        // Validate the FTP test result
+        if (ftpValue <= 0) {
+            throw new IllegalArgumentException("FTP must be positive");
+        }
 
-    /**
-     * Get scheduled test for a specific date.
-     */
-    public ScheduledTest getTestForDate(String athleteId, LocalDate date) {
-        return scheduledTests.getOrDefault(athleteId, List.of())
-            .stream()
-            .filter(t -> t.date().equals(date))
-            .findFirst()
-            .orElse(null);
+        var athlete = athleteRepository.findById(athleteId)
+                .orElseThrow(() -> new IllegalArgumentException("Athlete not found: " + athleteId));
+
+        // Determine test method (this would come from test configuration in a real implementation)
+        FtpTestResult.TestMethod method = FtpTestResult.TestMethod.FIELD_20MIN;
+
+        // Calculate confidence based on method (simplified for now)
+        double confidence = switch (method) {
+            case LAB_LACTATE -> 95.0;
+            case FIELD_RAMP, FIELD_20MIN -> 85.0;
+            case ESTIMATED -> 70.0;
+        };
+
+        // Create FTP test result
+        FtpTestResult testResult = new FtpTestResult(
+                Watts.of(ftpValue),
+                testDate,
+                method,
+                confidence
+        );
+
+        // Update athlete's FTP and recalculate zones using FtpTestService
+        var updatedAthlete = ftpTestService.processFtpTest(athleteId, testResult);
+
+        // Store the test result
+        testResultRepository.save(testResult);
+
+        // Update test status
+        updateTestStatus(athleteId, testDate, TestStatus.COMPLETED);
+
+        logger.info("Recorded FTP test result {} for athlete {}", ftpValue, athleteId);
+        return testResult;
     }
 
     /**
@@ -48,13 +101,14 @@ public class TestingService {
      */
     public String getTestInstructions(TestType testType) {
         return switch (testType) {
-            case FTP_RAMP -> """
-                FTP Ramp Test Instructions:
-                1. Warm up for 15-20 minutes at easy pace
-                2. Start the test at 100 watts and increase by 20 watts every 4 minutes
-                3. Maintain consistent effort until you can no longer hold the pace
-                4. Cool down for 10-15 minutes after the test
-                5. Your FTP will be calculated as 75% of the average power of the last 20 minutes
+            case FTP_TEST -> """
+                FTP Test Instructions:
+                1. Warm up for 15-20 minutes at easy pace (Zone 2)
+                2. Complete a 20-minute time trial at maximum sustainable effort
+                3. Maintain consistent power output throughout
+                4. Record your average power for the 20 minutes
+                5. Your FTP will be calculated as 95% of your 20-minute average power
+                6. Cool down for 10-15 minutes at easy pace
                 """;
             case THRESHOLD -> """
                 Threshold Test Instructions:
@@ -74,41 +128,76 @@ public class TestingService {
     }
 
     /**
-     * Record the result of an FTP test and update athlete metrics.
-     * Returns the new FTP value.
+     * Get all scheduled tests for an athlete.
      */
-    public double recordFtpTestResult(String athleteId, LocalDate testDate, double ftpResult) {
-        // Store the actual FTP result
-        ftpResults.put(athleteId + "_" + testDate.toString(), ftpResult);
-        
-        // Update the scheduled test status
-        scheduledTests.computeIfAbsent(athleteId, k -> new ArrayList<>())
-            .removeIf(t -> t.date().equals(testDate) && t.type() == TestType.FTP_RAMP);
-        scheduledTests.get(athleteId).add(new ScheduledTest(testDate, TestType.FTP_RAMP, TestStatus.COMPLETED));
-        
-        return ftpResult;
+    public List<ScheduledTest> getScheduledTests(String athleteId) {
+        return scheduledTests.getOrDefault(athleteId, List.of());
     }
 
     /**
-     * Get the latest FTP result for an athlete.
+     * Get scheduled test for a specific date.
      */
-    public Double getLatestFtpResult(String athleteId) {
+    public ScheduledTest getTestForDate(String athleteId, LocalDate date) {
         return scheduledTests.getOrDefault(athleteId, List.of())
-            .stream()
-            .filter(t -> t.type() == TestType.FTP_RAMP && t.status() == TestStatus.COMPLETED)
-            .max(java.util.Comparator.comparing(ScheduledTest::date))
-            .map(t -> ftpResults.get(athleteId + "_" + t.date().toString()))
-            .orElse(null);
+                .stream()
+                .filter(t -> t.date().equals(date))
+                .findFirst()
+                .orElse(null);
     }
 
+    /**
+     * Get all historical test results for an athlete.
+     */
+    public List<FtpTestResult> getHistoricalTestResults(String athleteId) {
+        return testResultRepository.findByAthleteId(athleteId);
+    }
+
+    /**
+     * Get the latest FTP test result for an athlete.
+     */
+    public Optional<FtpTestResult> getLatestFtpTestResult(String athleteId) {
+        return testResultRepository.findByAthleteId(athleteId).stream()
+                .max(java.util.Comparator.comparing(FtpTestResult::testDate));
+    }
+
+    /**
+     * Check if an athlete needs to recalculate zones after an FTP update.
+     * Returns true if there are future workouts that should reflect the new FTP.
+     */
+    public boolean needsZoneRecalculation(String athleteId, LocalDate ftpUpdateDate) {
+        // In a real implementation, this would check for future workouts
+        // For now, assume true to trigger recalculation
+        return true;
+    }
+
+    /**
+     * Update test status in the schedule.
+     */
+    private void updateTestStatus(String athleteId, LocalDate testDate, TestStatus status) {
+        scheduledTests.computeIfAbsent(athleteId, k -> new ArrayList<>())
+                .removeIf(t -> t.date().equals(testDate));
+        scheduledTests.get(athleteId).add(new ScheduledTest(testDate, TestType.FTP_TEST, status));
+    }
+
+    /**
+     * Record for athlete FTP test history.
+     */
+    public record TestHistoryRecord(
+            String athleteId,
+            double ftpValue,
+            LocalDate testDate,
+            FtpTestResult.TestMethod testMethod,
+            double confidencePercent
+    ) {}
+
     public record ScheduledTest(
-        LocalDate date,
-        TestType type,
-        TestStatus status
+            LocalDate date,
+            TestType type,
+            TestStatus status
     ) {}
 
     public enum TestType {
-        FTP_RAMP,
+        FTP_TEST,
         THRESHOLD,
         VO2_MAX
     }

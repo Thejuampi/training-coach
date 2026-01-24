@@ -210,6 +210,23 @@ TUI profile `openapi-client` generates a WebClient client from `api/openapi.json
 - Cucumber tests use Spring + Kotlin step defs; reuse the existing
   `TestFitnessPlatformPort` in `CucumberSpringConfiguration.kt` when possible.
 
+### Assertion Rules
+- **Single Assertion**: Each test method must have exactly one assertion.
+- **Chain Assertions**: If multiple assertions are needed, use chain of AssertJ calls with meaningful descriptions:
+  ```java
+  assertThat(list).as("Workout list should contain expected activities")
+      .hasSize(4)
+      .contains(A, B, C, D);
+  ```
+- **Soft Assertions**: If chaining is not sufficient, use SoftAssertions:
+  ```java
+  softly.assertThat(list).hasSize(4);
+  softly.assertThat(firstItem).isNotNull();
+  softly.assertThat(secondItem).isNotNull();
+  softly.assertAll();
+  ```
+- **Rationale**: Single assertions make debugging easier and clearly document what the test is validating.
+
 ### Concurrency in acceptance tests
 - **Thread Safety**: Cucumber tests are designed to run concurrently for speed. Use `@ScenarioScope` for beans holding state (e.g., in-memory repositories) to ensure isolation per scenario.
 - **Data Structures**: In-memory repositories use `ConcurrentHashMap` for thread-safe operations without blocking.

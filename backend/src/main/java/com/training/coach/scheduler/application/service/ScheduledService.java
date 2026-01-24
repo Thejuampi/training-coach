@@ -3,6 +3,7 @@ package com.training.coach.scheduler.application.service;
 import com.training.coach.sync.application.service.SyncService;
 import com.training.coach.wellness.application.service.WellnessReminderService;
 import com.training.coach.athlete.application.service.NotificationService;
+import com.training.coach.athlete.application.service.NotificationSchedulerService;
 import com.training.coach.athlete.application.port.out.AthleteRepository;
 import com.training.coach.athlete.domain.model.Notification;
 import java.time.LocalDate;
@@ -24,16 +25,19 @@ public class ScheduledService {
     private final SyncService syncService;
     private final WellnessReminderService wellnessReminderService;
     private final NotificationService notificationService;
+    private final NotificationSchedulerService notificationSchedulerService;
     private final AthleteRepository athleteRepository;
 
     public ScheduledService(
             SyncService syncService,
             WellnessReminderService wellnessReminderService,
             NotificationService notificationService,
+            NotificationSchedulerService notificationSchedulerService,
             AthleteRepository athleteRepository) {
         this.syncService = syncService;
         this.wellnessReminderService = wellnessReminderService;
         this.notificationService = notificationService;
+        this.notificationSchedulerService = notificationSchedulerService;
         this.athleteRepository = athleteRepository;
     }
 
@@ -118,6 +122,11 @@ public class ScheduledService {
         // 1. Check all athletes for recent violations
         // 2. Send notifications to coaches when violations are detected
         // 3. Update safety status for affected athletes
+
+        // Add notification scheduler service calls
+        notificationSchedulerService.sendDailyWorkoutReminders();
+        notificationSchedulerService.sendMissedSessionAlerts();
+        notificationSchedulerService.sendFatigueWarnings();
 
         logger.info("Safety violation check completed");
     }

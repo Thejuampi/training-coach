@@ -19,7 +19,6 @@ class InMemoryPlanRepositoryTest {
     @Test
     fun `save should store and return plan summary`() {
         val plan = createTestPlanSummary("plan-1")
-        StringTokenizer
         val saved = repository.save(plan)
 
         assertThat(saved).isEqualTo(plan)
