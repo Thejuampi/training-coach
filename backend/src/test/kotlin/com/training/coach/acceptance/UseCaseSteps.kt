@@ -97,6 +97,7 @@ import com.training.coach.analysis.application.service.WorkoutIntensityPurpose
 import com.training.coach.user.domain.model.ActivityVisibility
 import com.training.coach.user.domain.model.WellnessDataSharing
 import com.training.coach.trainingplan.application.service.PlanService
+import com.training.coach.reporting.application.service.WeeklyReportService
 import com.training.coach.activity.application.port.out.ActivityRepository
 
 @ScenarioScope
@@ -127,7 +128,8 @@ open class UseCaseSteps(
     private val exportService: ExportService,
     private val seilerIntensityClassificationService: SeilerIntensityClassificationService,
     private val planService: PlanService,
-    private val activityRepository: ActivityRepository
+    private val activityRepository: ActivityRepository,
+    private val weeklyReportService: WeeklyReportService
 ) {
     private var athleteProfile: AthleteProfile? = null
     private var trainingMetrics: TrainingMetrics? = null

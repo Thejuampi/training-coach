@@ -9,8 +9,10 @@ import com.training.coach.security.RefreshTokenStore;
 import com.training.coach.testconfig.inmemory.InMemoryActivityRepository;
 import com.training.coach.testconfig.inmemory.InMemoryAthleteRepository;
 import com.training.coach.testconfig.inmemory.InMemoryEventRepository;
+import com.training.coach.reporting.application.port.out.WeeklyReportRepository;
 import com.training.coach.testconfig.inmemory.InMemoryNotificationRepository;
 import com.training.coach.testconfig.inmemory.InMemoryPlanRepository;
+import com.training.coach.testconfig.inmemory.InMemoryWeeklyReportRepository;
 import com.training.coach.testconfig.inmemory.InMemoryRefreshTokenStore;
 import com.training.coach.testconfig.inmemory.InMemorySystemUserRepository;
 import com.training.coach.testconfig.inmemory.InMemoryTrainingLoadRepository;
@@ -101,5 +103,10 @@ public class InMemoryRepositoriesTestConfig {
     @Bean
     public NotificationRepository notificationRepository() {
         return new InMemoryNotificationRepository();
+    }
+
+    @Bean
+    public WeeklyReportRepository weeklyReportRepository() {
+        return new InMemoryWeeklyReportRepository();
     }
 }
