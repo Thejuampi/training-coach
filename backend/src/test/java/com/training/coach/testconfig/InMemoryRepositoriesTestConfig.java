@@ -5,11 +5,18 @@ import com.training.coach.athlete.application.port.out.AthleteRepository;
 import com.training.coach.athlete.application.port.out.EventRepository;
 import com.training.coach.athlete.application.port.out.FitnessPlatformPort;
 import com.training.coach.athlete.application.port.out.NotificationRepository;
+import com.training.coach.privacy.application.port.out.ConsentLogRepository;
+import com.training.coach.privacy.application.port.out.DataDeletionRequestRepository;
+import com.training.coach.privacy.application.port.out.DataExportRequestRepository;
+import com.training.coach.reporting.application.port.out.WeeklyReportRepository;
 import com.training.coach.security.RefreshTokenStore;
 import com.training.coach.testconfig.inmemory.InMemoryActivityRepository;
 import com.training.coach.testconfig.inmemory.InMemoryAthleteRepository;
 import com.training.coach.testconfig.inmemory.InMemoryEventRepository;
 import com.training.coach.reporting.application.port.out.WeeklyReportRepository;
+import com.training.coach.testconfig.inmemory.InMemoryConsentLogRepository;
+import com.training.coach.testconfig.inmemory.InMemoryDataDeletionRequestRepository;
+import com.training.coach.testconfig.inmemory.InMemoryDataExportRequestRepository;
 import com.training.coach.testconfig.inmemory.InMemoryNotificationRepository;
 import com.training.coach.testconfig.inmemory.InMemoryPlanRepository;
 import com.training.coach.testconfig.inmemory.InMemoryWeeklyReportRepository;
@@ -108,5 +115,20 @@ public class InMemoryRepositoriesTestConfig {
     @Bean
     public WeeklyReportRepository weeklyReportRepository() {
         return new InMemoryWeeklyReportRepository();
+    }
+
+    @Bean
+    public DataExportRequestRepository dataExportRequestRepository() {
+        return new InMemoryDataExportRequestRepository();
+    }
+
+    @Bean
+    public DataDeletionRequestRepository dataDeletionRequestRepository() {
+        return new InMemoryDataDeletionRequestRepository();
+    }
+
+    @Bean
+    public ConsentLogRepository consentLogRepository() {
+        return new InMemoryConsentLogRepository();
     }
 }
