@@ -1,6 +1,7 @@
 package com.training.coach.athlete.presentation;
 
 import com.training.coach.athlete.application.service.AvailabilityService;
+import com.training.coach.athlete.application.service.TravelAvailabilityService;
 import com.training.coach.athlete.domain.model.AvailabilityTemplate;
 import com.training.coach.athlete.domain.model.TravelException;
 import com.training.coach.shared.domain.unit.Hours;

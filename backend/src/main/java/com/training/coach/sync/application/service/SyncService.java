@@ -158,9 +158,9 @@ public class SyncService {
                 date,
                 java.util.List.of(
                     new ConflictRecord("Intervals.icu", "activity1", 60, date),
-                    new ConflictRecord("Strava", "activity2", 65, date.plusMinutes(10))
+                    new ConflictRecord("Strava", "activity2", 65, date)
                 ),
-                ActivityConflict.ConflictStatus.AMBIGUOUS,
+                ConflictStatus.AMBIGUOUS,
                 null
             )
         );
@@ -180,7 +180,7 @@ public class SyncService {
                         conflict.athleteId(),
                         conflict.date(),
                         conflict.conflictingRecords(),
-                        ActivityConflict.ConflictStatus.RESOLVED,
+                        ConflictStatus.RESOLVED,
                         conflict.conflictingRecords().get(0).activityId()
                     );
                 }
@@ -202,7 +202,7 @@ public class SyncService {
                     conflict.athleteId(),
                     conflict.date(),
                     conflict.conflictingRecords(),
-                    ActivityConflict.ConflictStatus.REQUIRES_REVIEW,
+                    ConflictStatus.REQUIRES_REVIEW,
                     null
                 );
             }

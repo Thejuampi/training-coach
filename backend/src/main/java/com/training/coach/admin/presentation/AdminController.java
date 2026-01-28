@@ -1,12 +1,16 @@
 package com.training.coach.admin.presentation;
 
 import com.training.coach.athlete.application.service.AthleteService;
-import com.training.coach.athlete.application.port.out.ActivityRepository;
+import com.training.coach.activity.application.port.out.ActivityRepository;
 import com.training.coach.athlete.domain.model.Athlete;
 import com.training.coach.integration.application.service.IntegrationService;
+import com.training.coach.reporting.application.service.OrganizationReportService;
+import com.training.coach.reporting.domain.model.OrganizationReport;
 import com.training.coach.shared.functional.Result;
 import com.training.coach.user.application.service.SystemUserService;
 import com.training.coach.user.domain.model.SystemUser;
+import com.training.coach.user.domain.model.UserRole;
+import com.training.coach.user.domain.model.UserPreferences;
 import com.training.coach.wellness.application.port.out.WellnessRepository;
 import java.util.List;
 import java.util.UUID;
@@ -26,18 +30,21 @@ public class AdminController {
     private final ActivityRepository activityRepository;
     private final WellnessRepository wellnessRepository;
     private final IntegrationService integrationService;
+    private final OrganizationReportService organizationReportService;
 
     public AdminController(
             SystemUserService userService,
             AthleteService athleteService,
             ActivityRepository activityRepository,
             WellnessRepository wellnessRepository,
-            IntegrationService integrationService) {
+            IntegrationService integrationService,
+            OrganizationReportService organizationReportService) {
         this.userService = userService;
         this.athleteService = athleteService;
         this.activityRepository = activityRepository;
         this.wellnessRepository = wellnessRepository;
         this.integrationService = integrationService;
+        this.organizationReportService = organizationReportService;
     }
 
     /**
@@ -149,14 +156,15 @@ public class AdminController {
     public ResponseEntity<OrganizationReportResponse> getOrganizationReport(
             @RequestParam String startDate,
             @RequestParam String endDate) {
-        var result = integrationService.getOrganizationReport(startDate, endDate);
+        var result = organizationReportService.getOrganizationReport(startDate, endDate);
         if (result.isSuccess()) {
+            OrganizationReport report = result.value().get();
             return ResponseEntity.ok(new OrganizationReportResponse(
-                    result.value().get().totalAthletes(),
-                    result.value().get().activeAthletes(),
-                    result.value().get().averageReadiness(),
-                    result.value().get().averageCompliance(),
-                    result.value().get().recentActivities()
+                    report.totalAthletes(),
+                    report.activeAthletes(),
+                    report.averageReadiness(),
+                    report.averageCompliance(),
+                    report.athleteSummaries().size()
             ));
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -166,8 +174,8 @@ public class AdminController {
     // Request/Response DTOs
     public record AdminCreateUserRequest(
             String name,
-            SystemUser.UserRole role,
-            SystemUser.UserPreferences preferences,
+            UserRole role,
+            UserPreferences preferences,
             String username,
             String password) {}
 

@@ -63,32 +63,81 @@ public class EventService {
 
     /**
      * Update event date and trigger plan rebase if needed.
+     * For A-priority events, rebases the athlete's active training plan.
      */
     public Result<Event> updateEventDate(String eventId, LocalDate newDate) {
-        return repository.findById(eventId)
+        return Optional.ofNullable(repository.findById(eventId))
             .map(existing -> {
                 LocalDate oldDate = existing.date();
                 Event updated = existing.withDate(newDate);
                 Event saved = repository.save(updated);
 
-                // Check if there's a published plan that needs rebasing
-                planService.getPlansForAthlete(existing.athleteId()).stream()
-                    .filter(plan -> plan.endDate().equals(oldDate))
-                    .findFirst()
-                    .ifPresent(plan -> {
-                        logger.info("Triggering plan rebase for plan {} due to event date change", plan.id());
-                        planRebaseService.rebasePlanToDate(
-                            plan.id(),
-                            plan.currentVersion(),
-                            newDate,
-                            "Event date changed from " + oldDate + " to " + newDate,
-                            "system"
-                        );
-                    });
+                // Trigger plan rebase for A-priority events
+                if (existing.priority() == Event.EventPriority.A) {
+                    rebasePlanForEventChange(saved.athleteId(), oldDate, newDate);
+                }
+
+                logger.info("Event date changed from {} to {} for event {}", oldDate, newDate, eventId);
 
                 return Result.success(saved);
             })
             .orElse(Result.failure(new RuntimeException("Event not found")));
+    }
+
+    /**
+     * Rebase training plans when an A-priority event date changes.
+     * Finds plans where the event is the target (end) event and rebases them.
+     */
+    private void rebasePlanForEventChange(String athleteId, LocalDate oldDate, LocalDate newDate) {
+        try {
+            var plans = planService.getPlansForAthlete(athleteId);
+            if (plans.isEmpty()) {
+                logger.info("No published plans found for athlete {}, skipping rebase", athleteId);
+                return;
+            }
+
+            // Calculate the date shift
+            long daysShift = java.time.temporal.ChronoUnit.DAYS.between(oldDate, newDate);
+            if (daysShift == 0) {
+                return;
+            }
+
+            // Rebase each published plan where the event is near the plan end
+            for (var planSummary : plans) {
+                var planVersion = planService.getPlanVersion(planSummary.id(), planSummary.currentVersion());
+
+                // Get the plan's end date (last workout date)
+                LocalDate planEndDate = planVersion.workouts().stream()
+                    .map(workout -> workout.date())
+                    .max(java.time.Comparator.naturalOrder())
+                    .orElse(null);
+
+                if (planEndDate == null) {
+                    continue;
+                }
+
+                // Check if the event is within 7 days of the plan end (likely the goal event)
+                long daysFromPlanEnd = Math.abs(java.time.temporal.ChronoUnit.DAYS.between(oldDate, planEndDate));
+                if (daysFromPlanEnd <= 7) {
+                    // The event is likely the goal event for this plan - rebase it
+                    LocalDate newPlanEndDate = planEndDate.plusDays((int) daysShift);
+
+                    planRebaseService.rebasePlanToDate(
+                        planSummary.id(),
+                        planSummary.currentVersion(),
+                        newPlanEndDate,
+                        String.format("Event date changed from %s to %s", oldDate, newDate),
+                        "system"
+                    );
+
+                    logger.info("Rebased plan {} for athlete {} due to A-priority event date change ({} day shift)",
+                        planSummary.id(), athleteId, daysShift);
+                }
+            }
+        } catch (Exception e) {
+            // Log but don't fail the event update
+            logger.error("Failed to rebase plan for event date change: {}", e.getMessage(), e);
+        }
     }
 
     /**

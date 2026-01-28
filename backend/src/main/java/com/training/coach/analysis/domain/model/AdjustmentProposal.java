@@ -190,7 +190,7 @@ public record AdjustmentProposal(
             String blockingRule,
             String warningMessage
     ) {
-        public static GuardrailCheckResult passed() {
+        public static GuardrailCheckResult createPassed() {
             return new GuardrailCheckResult(true, false, null, null);
         }
 

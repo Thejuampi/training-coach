@@ -45,9 +45,7 @@ public class WellnessReminderService {
      */
     private boolean needsWellnessReminder(String athleteId, LocalDate threeDaysAgo) {
         // Get latest wellness submission for the athlete
-        var latestWellness = wellnessRepository.findByAthleteId(athleteId)
-                .stream()
-                .max((w1, w2) -> w1.date().compareTo(w2.date()));
+        var latestWellness = wellnessRepository.findLatestByAthleteId(athleteId);
 
         if (latestWellness.isEmpty()) {
             // No wellness data ever - remind to start submitting
@@ -65,9 +63,7 @@ public class WellnessReminderService {
      * Calculate how many days since the last wellness submission.
      */
     private int calculateDaysSinceSubmission(String athleteId, LocalDate threeDaysAgo) {
-        var latestWellness = wellnessRepository.findByAthleteId(athleteId)
-                .stream()
-                .max((w1, w2) -> w1.date().compareTo(w2.date()));
+        var latestWellness = wellnessRepository.findLatestByAthleteId(athleteId);
 
         if (latestWellness.isEmpty()) {
             return -1; // Never submitted

@@ -154,7 +154,8 @@ public class PlanRebaseService {
                         workout.date().plusDays(daysShift),
                         workout.type(),
                         workout.durationMinutes(),
-                        workout.intensityProfile()
+                        workout.intensityProfile(),
+                        workout.intervals()
                     );
                 }
             })

@@ -1,8 +1,14 @@
 package com.training.coach.workout.application.service;
 
-import com.training.coach.athlete.application.port.out.PlanRepository;
+import com.training.coach.trainingplan.application.port.out.PlanRepository;
 import com.training.coach.athlete.domain.model.Workout;
+import com.training.coach.athlete.domain.model.Workout.IntensityProfile;
+import com.training.coach.athlete.domain.model.Workout.Interval;
+import com.training.coach.athlete.domain.model.Workout.WorkoutType;
+import com.training.coach.shared.domain.unit.BeatsPerMinute;
 import com.training.coach.shared.domain.unit.Minutes;
+import com.training.coach.shared.domain.unit.Percent;
+import com.training.coach.shared.domain.unit.Watts;
 import com.training.coach.workout.application.port.out.WorkoutTemplateRepository;
 import com.training.coach.workout.domain.model.WorkoutTemplate;
 import org.slf4j.Logger;
@@ -164,17 +170,68 @@ public class WorkoutLibraryService {
             throw new IllegalStateException("Template is not available for use");
         }
 
+        // Convert template type to workout type
+        WorkoutType workoutType = mapWorkoutType(template.type());
+
+        // Create a simple intensity profile based on template type
+        IntensityProfile intensityProfile = createIntensityProfile(workoutType);
+
+        // Create a single interval representing the entire workout
+        Interval interval = new Interval(
+            Interval.IntervalType.THRESHOLD,
+            template.duration(),
+            Watts.of(200), // Default power target
+            BeatsPerMinute.of(150) // Default HR target
+        );
+
         // Create workout from template
         Workout workout = new Workout(
                 java.util.UUID.randomUUID().toString(),
                 date,
-                template.type().name(),
+                workoutType,
                 template.duration(),
-                template.intensityProfile()
+                intensityProfile,
+                List.of(interval)
         );
 
         logger.info("Inserted template '{}' into plan {} on {}", template.name(), planId, date);
         return workout;
+    }
+
+    /**
+     * Map template workout type to domain workout type.
+     */
+    private WorkoutType mapWorkoutType(WorkoutTemplate.WorkoutType templateType) {
+        return switch (templateType) {
+            case ENDURANCE -> WorkoutType.ENDURANCE;
+            case INTERVALS -> WorkoutType.INTERVALS;
+            case TEMPO, THRESHOLD -> WorkoutType.THRESHOLD;
+            case RECOVERY -> WorkoutType.RECOVERY;
+            default -> WorkoutType.ENDURANCE;
+        };
+    }
+
+    /**
+     * Create intensity profile based on workout type.
+     */
+    private IntensityProfile createIntensityProfile(WorkoutType type) {
+        return switch (type) {
+            case ENDURANCE -> new IntensityProfile(
+                Percent.of(60), Percent.of(25), Percent.of(10), Percent.of(5), Percent.of(0)
+            );
+            case THRESHOLD -> new IntensityProfile(
+                Percent.of(20), Percent.of(30), Percent.of(40), Percent.of(10), Percent.of(0)
+            );
+            case INTERVALS -> new IntensityProfile(
+                Percent.of(30), Percent.of(20), Percent.of(10), Percent.of(30), Percent.of(10)
+            );
+            case RECOVERY -> new IntensityProfile(
+                Percent.of(80), Percent.of(15), Percent.of(5), Percent.of(0), Percent.of(0)
+            );
+            default -> new IntensityProfile(
+                Percent.of(50), Percent.of(30), Percent.of(15), Percent.of(5), Percent.of(0)
+            );
+        };
     }
 
     /**

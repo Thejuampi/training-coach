@@ -39,7 +39,7 @@
         <lombok.version>1.18.30</lombok.version>
         <spotbugs.version>4.8.3</spotbugs.version>
         <spotless.version>2.43.0</spotless.version>
-        <jacoco.version>0.8.11</jacoco.version>
+        <jacoco.version>0.8.12</jacoco.version>
         <jacoco.argLine></jacoco.argLine>
         <mockwebserver.version>4.12.0</mockwebserver.version>
         <checkstyle.version>9.3</checkstyle.version>
@@ -107,6 +107,13 @@
                         <configuration>
                             <propertyName>jacoco.argLine</propertyName>
                         </configuration>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>

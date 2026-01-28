@@ -1,7 +1,7 @@
 package com.training.coach.workout.domain;
 
 import com.training.coach.shared.domain.model.AthleteId;
-import com.training.coach.shared.domain.model.WorkoutType;
+import com.training.coach.workout.domain.model.WorkoutTemplate.WorkoutType;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;

@@ -175,37 +175,21 @@ public class WorkoutController {
      */
     @GetMapping("/skip-reasons")
     public ResponseEntity<Map<String, String>> getSkipReasons() {
-        var reasons = Map.of(
-            "ILLNESS", "Medical illness or injury",
-            "FATIGUE", "Excessive fatigue or overtraining",
-            "PAIN", "Muscle or joint pain",
-            "WEATHER", "Inclement weather conditions",
-            "TRAVEL", "Travel or logistical issues",
-            "EQUIPMENT", "Equipment failure or unavailability",
-            "EXHAUSTED", "Completely exhausted from previous days",
-            "OVERREACHED", "Overreached from training load",
-            "PERSONAL", "Personal emergency or family matters",
-            "STRESSMENTAL", "Mental health or stress management",
-            "SUBSTITUTION", "Alternative activity planned by coach",
-            "TAPERING", "Following taper protocol",
-            "MISSED", "Missed without specific reason"
-        );
+        Map<String, String> reasons = new java.util.HashMap<>();
+        reasons.put("ILLNESS", "Medical illness or injury");
+        reasons.put("FATIGUE", "Excessive fatigue or overtraining");
+        reasons.put("PAIN", "Muscle or joint pain");
+        reasons.put("WEATHER", "Inclement weather conditions");
+        reasons.put("TRAVEL", "Travel or logistical issues");
+        reasons.put("EQUIPMENT", "Equipment failure or unavailability");
+        reasons.put("EXHAUSTED", "Completely exhausted from previous days");
+        reasons.put("OVERREACHED", "Overreached from training load");
+        reasons.put("PERSONAL", "Personal emergency or family matters");
+        reasons.put("STRESSMENTAL", "Mental health or stress management");
+        reasons.put("SUBSTITUTION", "Alternative activity planned by coach");
+        reasons.put("TAPERING", "Following taper protocol");
+        reasons.put("MISSED", "Missed without specific reason");
         return ResponseEntity.ok(reasons);
     }
 
-    /**
-     * Get execution status descriptions.
-     */
-    @GetMapping("/statuses")
-    public ResponseEntity<Map<String, String>> getExecutionStatuses() {
-        var statuses = Map.of(
-            "PLANNED", "Workout is planned but not yet executed",
-            "IN_PROGRESS", "Workout is in progress",
-            "COMPLETED", "Workout was completed successfully",
-            "SKIPPED", "Workout was skipped",
-            "PARTIAL", "Workout was partially completed",
-            "FAILED", "Workout attempt failed"
-        );
-        return ResponseEntity.ok(statuses);
-    }
 }

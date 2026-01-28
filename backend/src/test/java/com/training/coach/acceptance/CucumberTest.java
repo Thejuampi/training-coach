@@ -14,6 +14,7 @@ import org.junit.platform.suite.api.ConfigurationParameter;
 @SelectClasspathResource("features/safety-and-guardrails.feature")
 @SelectClasspathResource("features/seiler-intensity.feature")
 @SelectClasspathResource("features/athlete.feature")
+@SelectClasspathResource("features/athlete-self-service.feature")
 @SelectClasspathResource("features/admin.feature")
 @SelectClasspathResource("features/data-retention-consent.feature")
 @SelectClasspathResource("features/events-and-goals.feature")

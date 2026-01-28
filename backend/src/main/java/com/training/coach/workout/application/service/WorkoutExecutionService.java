@@ -4,7 +4,7 @@ import com.training.coach.activity.application.port.out.ActivityRepository;
 import com.training.coach.athlete.application.port.out.AthleteRepository;
 import com.training.coach.athlete.domain.model.Athlete;
 import com.training.coach.shared.domain.model.AthleteId;
-import com.training.coach.shared.domain.model.WorkoutType;
+import com.training.coach.workout.domain.model.WorkoutTemplate.WorkoutType;
 import com.training.coach.workout.application.port.out.WorkoutExecutionRepository;
 import com.training.coach.workout.application.port.out.WorkoutRepository;
 import com.training.coach.workout.domain.ExecutionStatus;
@@ -48,17 +48,15 @@ public class WorkoutExecutionService {
      * Start a workout execution.
      */
     public WorkoutExecution startWorkout(String athleteId, String plannedWorkoutId, LocalDateTime startTime) {
-        var athleteIdObj = new AthleteId(athleteId);
-
         // Verify athlete exists
-        var athleteResult = athleteRepository.findById(athleteIdObj);
+        var athleteResult = athleteRepository.findById(athleteId);
         if (!athleteResult.isPresent()) {
             throw new IllegalArgumentException("Athlete not found: " + athleteId);
         }
 
         // Create workout execution record
         var workoutExecution = WorkoutExecution.create(
-            athleteIdObj,
+            new AthleteId(athleteId),
             plannedWorkoutId,
             startTime.toLocalDate(),
             WorkoutType.ENDURANCE, // Will be determined from planned workout
@@ -114,42 +112,41 @@ public class WorkoutExecutionService {
      * Match a completed activity to a planned workout.
      */
     public WorkoutExecution matchActivityToWorkout(String athleteId, String activityId) {
-        var athleteIdObj = new AthleteId(athleteId);
-
-        // Get the activity
-        var activities = activityRepository.findByAthleteId(athleteIdObj);
-        var activity = activities.stream()
-                .filter(a -> a.id().equals(activityId))
-                .findFirst()
+        // Get the activity - find by athlete ID and activity external ID
+        var activityOpt = activityRepository.findByAthleteIdAndExternalActivityId(athleteId, activityId);
+        var activity = activityOpt
                 .orElseThrow(() -> new IllegalArgumentException("Activity not found: " + activityId));
 
         // Find planned workout for the same date
-        var plannedWorkouts = workoutRepository.findByAthleteId(athleteIdObj);
-        var plannedWorkout = plannedWorkouts.stream()
-                .filter(w -> w.date().equals(activity.date()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("No planned workout found for date: " + activity.date()));
+        var plannedWorkout = workoutRepository.findByAthleteIdAndDate(
+            new AthleteId(athleteId), activity.date()
+        ).orElseThrow(() -> new IllegalArgumentException("No planned workout found for date: " + activity.date()));
 
         // Determine workout type based on activity type
         var workoutType = determineWorkoutType(activity.type());
 
-        // Create or update workout execution
-        var existingExecution = workoutExecutionRepository.findByAthleteIdAndDate(athleteIdObj, activity.date())
-                .orElse(null);
+        // Create or update workout execution - using date range query
+        var startOfDay = activity.date().atStartOfDay();
+        var endOfDay = activity.date().atTime(23, 59, 59);
+        var executions = workoutExecutionRepository.findByAthleteIdAndDateRange(
+            new AthleteId(athleteId), startOfDay, endOfDay
+        );
+        var existingExecution = executions.isEmpty() ? null : executions.get(0);
 
         WorkoutExecution execution;
+        int durationMinutes = (int) (activity.durationSeconds().value() / 60);
         if (existingExecution != null) {
             execution = existingExecution
-                    .withDuration(activity.durationMinutes(), 0)
+                    .withDuration(durationMinutes, 0)
                     .withStatus(ExecutionStatus.COMPLETED);
         } else {
             execution = WorkoutExecution.create(
-                athleteIdObj,
+                new AthleteId(athleteId),
                 plannedWorkout.id(),
                 activity.date(),
                 workoutType,
                 LocalDateTime.now()
-            ).withDuration(activity.durationMinutes(), 0)
+            ).withDuration(durationMinutes, 0)
              .withStatus(ExecutionStatus.COMPLETED);
         }
 

@@ -41,7 +41,6 @@ Feature: Athlete workflows
     Then the activity is matched to the planned workout on "2026-01-03"
     And compliance for that workout is within tolerance
 
-  @wip
   Scenario: F6 Plan - view today's workout
     Given a published plan exists for a saved athlete
     When the athlete opens the plan for date "2026-01-06"
@@ -65,7 +64,6 @@ Feature: Athlete workflows
     When the athlete updates availability to "MONDAY,TUESDAY,THURSDAY" with weekly volume hours 7.0
     Then future plan generation uses the updated availability
 
-  @wip
   Scenario: UC19 Update measurement units
     Given a saved athlete with measurement system "METRIC"
     When the athlete updates distance unit to "MILES"
@@ -73,7 +71,6 @@ Feature: Athlete workflows
     Then the athlete preferences reflect distance unit "MILES"
     And the athlete preferences reflect weight unit "POUNDS"
 
-  @wip
   Scenario: UC19 Adjust privacy settings
     Given a saved athlete with default privacy settings
     When the athlete sets activity visibility to "PRIVATE"
@@ -81,7 +78,6 @@ Feature: Athlete workflows
     Then the athlete privacy settings are updated
     And activity data is only visible to the athlete and coach
 
-  @wip
   Scenario: UC19 Settings conflict with plan triggers notification
     Given a published plan exists for a saved athlete
     And the athlete updates weekly volume hours to 5.0
@@ -89,7 +85,6 @@ Feature: Athlete workflows
     Then the coach is notified of the settings change
     And the notification indicates a potential conflict with the current plan
 
-  @wip
   Scenario: F13 Events - athlete adds a goal race
     Given a saved athlete
     When the athlete adds a goal event "Spring Classic" on "2026-03-01" priority "A"

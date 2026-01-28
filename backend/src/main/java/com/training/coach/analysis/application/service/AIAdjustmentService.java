@@ -1,11 +1,11 @@
 package com.training.coach.analysis.application.service;
 
 import com.training.coach.athlete.application.port.out.AthleteRepository;
-import com.training.coach.athlete.application.port.out.WellnessRepository;
+import com.training.coach.wellness.application.port.out.WellnessRepository;
 import com.training.coach.athlete.domain.model.Athlete;
 import com.training.coach.analysis.domain.model.AdjustmentProposal;
 import com.training.coach.analysis.domain.model.AdjustmentProposal.AdjustmentType;
-import com.training.coach.integration.application.service.ClaudeAIClient;
+import com.training.coach.integration.application.service.ClaudeApiClient;
 import com.training.coach.wellness.domain.model.WellnessSnapshot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,13 +27,13 @@ public class AIAdjustmentService {
     private final AthleteRepository athleteRepository;
     private final WellnessRepository wellnessRepository;
     private final SafetyGuardrailService safetyGuardrailService;
-    private final ClaudeAIClient aiClient;
+    private final ClaudeApiClient aiClient;
 
     public AIAdjustmentService(
             AthleteRepository athleteRepository,
             WellnessRepository wellnessRepository,
             SafetyGuardrailService safetyGuardrailService,
-            ClaudeAIClient aiClient) {
+            ClaudeApiClient aiClient) {
         this.athleteRepository = athleteRepository;
         this.wellnessRepository = wellnessRepository;
         this.safetyGuardrailService = safetyGuardrailService;
@@ -192,7 +192,7 @@ public class AIAdjustmentService {
         return switch (proposal.type()) {
             case REDUCE_INTENSITY, REDUCE_VOLUME -> {
                 // Reducing load is generally safe
-                yield AdjustmentProposal.GuardrailCheckResult.passed();
+                yield AdjustmentProposal.GuardrailCheckResult.createPassed();
             }
             case INCREASE_VOLUME -> {
                 // Increasing load needs guardrail check
@@ -205,19 +205,19 @@ public class AIAdjustmentService {
                         proposal.athleteId(),
                         currentLoad,
                         proposedLoad,
-                        LocalDate.now()
+                        LocalDate.now().toString()
                 );
 
                 if (result.blocked()) {
                     yield AdjustmentProposal.GuardrailCheckResult.blocked(
-                            result.blockingRule(),
-                            result.blockingReason()
+                            result.ruleId(),
+                            result.blockingRule()
                     );
                 } else {
-                    yield AdjustmentProposal.GuardrailCheckResult.passed();
+                    yield AdjustmentProposal.GuardrailCheckResult.createPassed();
                 }
             }
-            default -> AdjustmentProposal.GuardrailCheckResult.passed();
+            default -> AdjustmentProposal.GuardrailCheckResult.createPassed();
         };
     }
 

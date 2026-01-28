@@ -10,7 +10,6 @@ Feature: Admin workflows
     When the integration is validated
     Then integration status is "active"
 
-  @wip
   Scenario: F1 Identity - create a coach user
     When the admin creates a user named "Coach A" with role "COACH"
     Then the user list contains a user named "Coach A" with role "COACH"
@@ -56,9 +55,9 @@ Feature: Admin workflows
     When the admin exports an organization report for date range "2026-01-01" to "2026-01-07"
     Then the report includes athlete readiness coverage and compliance summary
 
-  @wip
+  @smoke
   Scenario: F20 Privacy - delete athlete data on request
     Given an athlete exists with stored activities wellness and notes
-    When the admin deletes the athlete and all associated personal data
+    When the admin deletes the athlete
     Then the athlete cannot be found
     And all associated data is removed

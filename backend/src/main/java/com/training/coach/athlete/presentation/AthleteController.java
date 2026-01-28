@@ -4,6 +4,7 @@ import com.training.coach.athlete.application.service.AthleteService;
 import com.training.coach.athlete.application.service.EventService;
 import com.training.coach.athlete.domain.model.Athlete;
 import com.training.coach.athlete.domain.model.Event;
+import com.training.coach.athlete.domain.model.Event.EventPriority;
 import com.training.coach.athlete.domain.model.Workout;
 import com.training.coach.athlete.domain.model.UserPreferences;
 import com.training.coach.trainingplan.application.service.PlanService;
@@ -113,13 +114,8 @@ public class AthleteController {
      */
     @PostMapping("/{id}/events")
     public ResponseEntity<Event> addGoalEvent(@PathVariable String id, @RequestBody CreateEventRequest request) {
-        var event = new Event(
-                java.util.UUID.randomUUID().toString(),
-                id,
-                request.name(),
-                LocalDate.parse(request.date()),
-                request.priority()
-        );
+        EventPriority priority = EventPriority.valueOf(request.priority());
+        var event = Event.create(id, request.name(), LocalDate.parse(request.date()), priority);
 
         // In a real implementation, this would save to a repository
         return ResponseEntity.status(HttpStatus.CREATED).body(event);
